@@ -302,13 +302,12 @@ main {
 
 <main>
   <div class="notice" id="notice">
-    <p id="noticeText"><b>예시 페이지예요.</b> 만들기에서 단어를 탭하면 빈칸이 생기고, 풀기에서 키보드로 답을 입력해요. <b>PDF 열기</b>를 눌러 내 PDF를 고르면 책 전체로 바뀌어요.</p>
+    <p id="noticeText"><b>예시 페이지예요.</b> 만들기에서 단어를 탭하면 빈칸이 생기고, 풀기에서 키보드로 답을 입력해요. 내 PDF와 단어 위치 파일을 열면 책 전체로 바뀌어요.</p>
     <button class="btn primary" id="openFiles" type="button">PDF 열기</button>
   </div>
   <div class="stack" id="stack"></div>
 </main>
 
-<input type="file" id="quickInput" accept=".pdf,application/pdf,.json,application/json" multiple hidden>
 <input type="file" id="pdfInput" accept=".pdf,application/pdf" hidden>
 <input type="file" id="ocrInput" hidden>
 <input type="file" id="backupInput" hidden>
@@ -658,32 +657,6 @@ class PdfDoc {
       }
       ops = [];
     }
-  }
-
-  /** Bytes of the first embedded file whose name matches `test`, or null. */
-  async embedded(test) {
-    const cat = await this.get(this.trailer.Root);
-    const names = cat && await this.get(cat.Names);
-    const tree = names && await this.get(names.EmbeddedFiles);
-    if (!tree) return null;
-    const found = [];
-    const walk = async (node, depth) => {
-      node = await this.get(node);
-      if (!node || depth > 8) return;
-      const arr = await this.get(node.Names);
-      if (Array.isArray(arr)) for (let i = 0; i + 1 < arr.length; i += 2) found.push([String(arr[i]), arr[i + 1]]);
-      const kids = await this.get(node.Kids);
-      if (Array.isArray(kids)) for (const k of kids) await walk(k, depth + 1);
-    };
-    await walk(tree, 0);
-    for (const [name, ref] of found) {
-      if (!test.test(name)) continue;
-      const spec = await this.get(ref);
-      const ef = spec && await this.get(spec.EF);
-      const stream = ef && await this.get(ef.F || ef.UF);
-      if (stream && stream.__start != null) return this.decoded(stream);
-    }
-    return null;
   }
 
   /** Raw 8-bit samples of a Flate image (1 or 8 bits, 1 or 3 components). */
@@ -1543,8 +1516,57 @@ function buildPop(v) {
 }
 
 /* ================= 풀기: type into the blank, Enter to check ================= */
-const norm = s => String(s || '').normalize('NFC').toLowerCase().replace(/[\s·•ㆍ∙.,:;!?'"“”‘’()[\]{}<>「」『』《》〈〉\-–—~…]/g, '');
-const isRight = (val, ans) => { const v = norm(val); return !!v && String(ans).split('|').some(a => norm(a) === v); };
+/* Grading. Spacing and punctuation never count, and a different particle at the
+   end (은/는/이/가…) is still right. Answers of 4+ syllables forgive one small typo
+   (two from 9 syllables), measured in jamo, but never in the first syllable or in
+   numbers, where legal answers flip meaning (유효/무효, 제203조/제205조). */
+const clean = s => String(s || '').normalize('NFC').toLowerCase().replace(/[\s\p{P}\p{S}ㆍ]/gu, '');
+const PARTICLES = ['으로써', '으로서', '에서는', '이라고', '에서', '에게', '으로', '로써', '로서', '까지', '부터', '이나', '이며', '이고', '라고', '에는', '에도',
+  '은', '는', '이', '가', '을', '를', '의', '에', '로', '와', '과', '도', '만'];
+// words whose last syllable only looks like a particle (처분권주의 must not shrink to 처분권주)
+const WORD_ENDINGS = ['주의', '합의', '동의', '결의', '임의', '선의', '악의', '신의', '의의', '이의', '회의', '정의', '논의', '제도', '정도', '한도', '국가', '평가', '대가', '결과', '효과', '차이', '사이'];
+const stripParticle = s => {
+  if (WORD_ENDINGS.some(w => s.endsWith(w))) return s;
+  for (const p of PARTICLES) if (s.length - p.length >= 2 && s.endsWith(p)) return s.slice(0, -p.length);
+  return s;
+};
+const jamo = s => {
+  const out = [];
+  for (const c of s) {
+    const k = c.charCodeAt(0) - 0xAC00;
+    if (k >= 0 && k < 11172) { out.push('i' + Math.floor(k / 588), 'm' + Math.floor(k % 588 / 28)); if (k % 28) out.push('f' + k % 28); }
+    else out.push(c);
+  }
+  return out;
+};
+const editDistance = (a, b) => {
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[b.length];
+};
+const numbersIn = s => (s.match(/\d+/g) || []).join(',');
+/** 'exact', 'near' (accepted with a small typo) or false. */
+function grade(val, ans) {
+  const v = clean(val);
+  if (!v) return false;
+  let near = false;
+  for (const alt of String(ans).split('|')) {
+    const a = clean(alt);
+    if (!a) continue;
+    const sv = stripParticle(v), sa = stripParticle(a);
+    if (v === a || sv === sa || sv === a || v === sa) return 'exact';
+    const n = Array.from(sa).length;
+    if (n >= 4 && a[0] === v[0] && numbersIn(a) === numbersIn(v)) {
+      const d = Math.min(editDistance(jamo(a), jamo(v)), editDistance(jamo(sa), jamo(sv)));
+      if (d <= (n >= 9 ? 2 : 1)) near = true;
+    }
+  }
+  return near ? 'near' : false;
+}
 const CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
 const chosung = s => Array.from(s).map(c => { const k = c.charCodeAt(0) - 0xAC00; return k >= 0 && k < 11172 ? CHO[Math.floor(k / 588)] : c; }).join('');
 const qstate = id => { if (!S.quiz.has(id)) S.quiz.set(id, { st: 'open', val: '', wrong: false }); return S.quiz.get(id); };
@@ -1629,12 +1651,14 @@ function checkAnswer(v, id, inp, cover) {
   if (!b) return;
   const q = qstate(id);
   q.val = inp.value;
-  if (!norm(inp.value)) { focusNext(v.i, id); return; }
-  if (isRight(inp.value, b.ans)) {
+  if (!clean(inp.value)) { focusNext(v.i, id); return; }
+  const g = grade(inp.value, b.ans);
+  if (g) {
     q.st = 'ok';
     recordResult(v.i, id, true);
     finishBlank(v, id, 'ok');
     focusNext(v.i, id);
+    if (g === 'near') toast(`거의 맞았어요. 정답은 "${b.ans.split('|')[0].trim()}"예요.`);
   } else {
     recordResult(v.i, id, false);
     cover.classList.remove('wrong');
@@ -1765,23 +1789,14 @@ async function installBook(book) {
   }
 }
 
-/** Opens the book; without `ocrText` the word positions must be inside the PDF. Resolves the OCR text used. */
+/** Opens the book from the PDF and its word-position text. Resolves that text. */
 async function openBook(pdfFile, ocrText) {
-  let pdf;
-  try { pdf = await new PdfDoc(pdfFile).open(); }
-  catch (e) { throw new Error(e instanceof PdfError ? e.message : 'PDF를 읽지 못했어요: ' + (e.message || e)); }
-  if (ocrText == null) {
-    const bytes = await pdf.embedded(/ocr\.json$/i).catch(() => null);
-    if (!bytes) {
-      const err = new Error('이 PDF에는 단어 위치 정보가 없어요. ② 단어 위치 파일도 골라 주세요.');
-      err.code = 'NEED_OCR';
-      throw err;
-    }
-    ocrText = new TextDecoder().decode(bytes);
-  }
   let ocr;
   try { ocr = JSON.parse(ocrText); } catch (e) { throw new Error('단어 위치 파일을 읽지 못했어요. 맥에서 만든 _OCR.json 파일이 맞는지 확인해 주세요.'); }
   if (!ocr || !Array.isArray(ocr.pages)) throw new Error('단어 위치 파일의 형식이 달라요.');
+  let pdf;
+  try { pdf = await new PdfDoc(pdfFile).open(); }
+  catch (e) { throw new Error(e instanceof PdfError ? e.message : 'PDF를 읽지 못했어요: ' + (e.message || e)); }
   if (pdf.pages.length !== ocr.pages.length) throw new Error(`두 파일의 쪽수가 달라요 (PDF ${pdf.pages.length}쪽, 단어 위치 파일 ${ocr.pages.length}쪽). 같은 책의 파일인지 확인해 주세요.`);
   const hexId = String(ocr.id || '').replace(/[^0-9a-f]/gi, '').slice(0, 16);
   const book = {
@@ -1797,7 +1812,7 @@ async function openBook(pdfFile, ocrText) {
   return ocrText;
 }
 
-const DEMO_NOTICE = '<b>예시 페이지예요.</b> 만들기에서 단어를 탭하면 빈칸이 생기고, 풀기에서 키보드로 답을 입력해요. <b>PDF 열기</b>를 눌러 내 PDF를 고르면 책 전체로 바뀌어요.';
+const DEMO_NOTICE = '<b>예시 페이지예요.</b> 만들기에서 단어를 탭하면 빈칸이 생기고, 풀기에서 키보드로 답을 입력해요. 내 PDF와 단어 위치 파일을 열면 책 전체로 바뀌어요.';
 async function openDemo() {
   const book = S.demoBook || (S.demoBook = await buildDemoBook());
   await installBook(book);
@@ -1813,24 +1828,6 @@ async function openAndRemember(pdfFile, ocrText, remember) {
       toast(ok ? '책을 열었어요. 다음부터는 이 페이지만 열면 바로 열려요.' : '이 기기에 PDF를 저장하지 못했어요. 다음에도 PDF를 골라 주세요.');
     });
   } else { FileCache.del('pdf'); FileCache.del('ocr'); }
-}
-
-/** The one-tap path: whatever the picker returns (one PDF, or a PDF and its word file). */
-async function quickOpen(files) {
-  const pdf = files.find(f => /\.pdf$/i.test(f.name) || f.type === 'application/pdf');
-  const json = files.find(f => /\.json$/i.test(f.name));
-  if (json) pend.ocr = json;
-  if (!pdf) { filesSheet(json ? 'PDF도 골라 주세요.' : 'PDF 파일을 골라 주세요.'); return; }
-  pend.pdf = pdf;
-  const restore = S.book && S.book.demo ? DEMO_NOTICE : '';
-  setNotice('<b>책을 여는 중…</b> 처음엔 몇 초 걸려요.', false);
-  try {
-    await openAndRemember(pdf, json ? await json.text() : null, ls.get('remember') !== false);
-  } catch (e) {
-    console.warn(e);
-    setNotice(restore, !!restore);
-    filesSheet(e.message || String(e));
-  }
 }
 
 function openSheet(build) {
@@ -1856,7 +1853,7 @@ function closeSheet() { const a = $('sheetBg'), b = $('sheet'); if (a) a.remove(
 function filesSheet(err) {
   openSheet(sh => {
     sh.append(mk('h2', null, '내 책 열기'),
-      mk('p', 'hint', 'PDF를 골라 주세요. 단어 위치 정보가 들어 있지 않은 PDF라면 단어 위치 파일도 함께 골라요. 파일은 이 기기 안에서만 읽고 어디에도 올리지 않아요.'));
+      mk('p', 'hint', 'PDF와, 맥에서 만든 단어 위치 파일을 골라 주세요. 두 파일은 이 기기 안에서만 읽고 어디에도 올리지 않아요.'));
     const slot = (title, file, desc, inputId) => {
       const s = mk('div', 'slot' + (file ? ' ok' : ''));
       const btn = mk('button', 'btn', file ? '바꾸기' : '고르기');
@@ -1865,8 +1862,8 @@ function filesSheet(err) {
       s.append(mk('b', null, title), btn, mk('small', null, file ? `${file.name} · ${fmtSize(file.size)}` : desc));
       return s;
     };
-    sh.append(slot('① PDF', pend.pdf, '예: 윤곽기본서_빈칸용.pdf', 'pdfInput'),
-      slot('② 단어 위치 파일 (필요할 때만)', pend.ocr, '단어 위치 정보가 든 PDF면 고르지 않아도 돼요. 예: 윤곽기본서_OCR.json', 'ocrInput'));
+    sh.append(slot('① PDF', pend.pdf, '예: 윤곽기본서.pdf', 'pdfInput'),
+      slot('② 단어 위치 파일', pend.ocr, '예: 윤곽기본서_OCR.json (맥에서 만든 파일)', 'ocrInput'));
     const lab = mk('label', 'check'), cb = mk('input');
     cb.type = 'checkbox'; cb.id = 'rememberCb'; cb.checked = ls.get('remember') !== false;
     cb.addEventListener('change', () => ls.set('remember', cb.checked));
@@ -1879,7 +1876,7 @@ function filesSheet(err) {
     demo.addEventListener('click', () => { closeSheet(); openDemo(); });
     const go = mk('button', 'btn primary', '열기');
     go.type = 'button';
-    go.disabled = !pend.pdf;
+    go.disabled = !(pend.pdf && pend.ocr);
     go.addEventListener('click', () => doOpen(cb.checked, go));
     row.append(demo, go);
     sh.append(row);
@@ -1890,7 +1887,7 @@ async function doOpen(remember, btn) {
   btn.disabled = true;
   btn.textContent = 'PDF 읽는 중…';
   try {
-    await openAndRemember(pend.pdf, pend.ocr ? await pend.ocr.text() : null, remember);
+    await openAndRemember(pend.pdf, await pend.ocr.text(), remember);
   } catch (e) {
     console.error(e);
     filesSheet(e.message || String(e));
@@ -2076,8 +2073,7 @@ async function boot() {
   $('listBtn').addEventListener('click', () => S.book && listSheet());
   $('pageInd').addEventListener('click', () => S.book && (S.book.demo ? filesSheet() : listSheet()));
   $('filesBtn').addEventListener('click', () => filesSheet());
-  $('openFiles').addEventListener('click', () => $('quickInput').click());
-  $('quickInput').addEventListener('change', e => { const fs = Array.from(e.target.files || []); e.target.value = ''; if (fs.length) quickOpen(fs); });
+  $('openFiles').addEventListener('click', () => filesSheet());
   $('pdfInput').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) { pend.pdf = f; filesSheet(); } });
   $('ocrInput').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) { pend.ocr = f; filesSheet(); } });
   $('backupInput').addEventListener('change', async e => {
