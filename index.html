@@ -1,0 +1,2114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="빈칸 연습">
+<meta name="theme-color" content="#fafbfd" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#181c22" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>윤곽 빈칸 연습</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=Nanum+Myeongjo:wght@400;700&display=swap">
+<style>
+/* Layout: a quiet reading desk. Scanned pages sit centered like paper on a desk;
+   a thin toolbar floats above. Everything drawn ON the page uses paper tokens
+   (the scan is always white paper, even in dark mode). */
+:root {
+  --desk: #e6e9ee;
+  --chrome: rgba(250, 251, 253, .9);
+  --surface: #ffffff;
+  --line: #d3d9e1;
+  --ink: #17202c;
+  --muted: #627082;
+  --accent: #1e4fa3;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(30, 79, 163, .1);
+  --shadow: 0 1px 2px rgba(20, 32, 54, .14), 0 8px 26px rgba(20, 32, 54, .09);
+  /* on-paper tokens: identical in both themes */
+  --paper: #ffffff;
+  --paper-ink: #1a2230;
+  --paper-rule: #2a5cb0;
+  --paper-ok: #178248;
+  --paper-bad: #c8352a;
+  --mark: rgba(255, 210, 0, .42);
+  --mark-edge: #d9a900;
+  --mark-active: rgba(30, 110, 255, .22);
+  --mark-active-edge: #1e6eff;
+  --font-ui: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-paper: "Nanum Myeongjo", "AppleMyungjo", "Batang", serif;
+  --page-max: 980px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --desk: #111418; --chrome: rgba(24, 28, 34, .9); --surface: #1c2128; --line: #2d353f;
+    --ink: #e6eaf0; --muted: #9aa5b3; --accent: #8db1f2; --accent-ink: #0c1626;
+    --accent-soft: rgba(141, 177, 242, .14);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 10px 30px rgba(0, 0, 0, .35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --desk: #111418; --chrome: rgba(24, 28, 34, .9); --surface: #1c2128; --line: #2d353f;
+  --ink: #e6eaf0; --muted: #9aa5b3; --accent: #8db1f2; --accent-ink: #0c1626;
+  --accent-soft: rgba(141, 177, 242, .14);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 10px 30px rgba(0, 0, 0, .35);
+  color-scheme: dark;
+}
+html, body { min-height: 100%; }
+body {
+  background: var(--desk); color: var(--ink); font-family: var(--font-ui);
+  -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--chrome);
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- toolbar ---------- */
+.bar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  display: flex; align-items: center; gap: 10px; min-height: 52px;
+  padding-block: 6px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: var(--chrome); border-bottom: 1px solid var(--line);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px); backdrop-filter: saturate(1.4) blur(14px);
+}
+.bar .book { display: flex; flex-direction: column; min-width: 0; flex: 1 1 0; }
+.bar .book b { font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar .book button {
+  all: unset; cursor: pointer; font-size: 12px; color: var(--muted);
+  font-variant-numeric: tabular-nums; letter-spacing: .02em;
+}
+.seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--accent-soft); flex: none; }
+.seg button {
+  border: 0; background: transparent; padding: 7px 16px; border-radius: 8px;
+  font-size: 14px; font-weight: 500; color: var(--muted); min-height: 36px;
+}
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.14); }
+.tools { display: flex; gap: 4px; flex: 1 1 0; justify-content: flex-end; }
+.icon {
+  border: 0; background: transparent; width: 40px; height: 40px; border-radius: 10px;
+  display: inline-grid; place-items: center; color: var(--ink);
+}
+.icon:hover { background: var(--accent-soft); }
+.icon:disabled { opacity: .35; cursor: default; background: transparent; }
+.icon svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.score {
+  font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums;
+  padding: 0 4px; align-self: center; white-space: nowrap;
+}
+.score b { color: var(--ink); font-weight: 600; }
+
+/* ---------- notices ---------- */
+.notice {
+  margin: 14px auto 0; max-width: var(--page-max);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+  padding: 12px 14px; border-radius: 12px; background: var(--surface);
+  border: 1px solid var(--line); font-size: 14px; line-height: 1.5;
+}
+.notice p { margin: 0; flex: 1 1 260px; min-width: 0; color: var(--muted); }
+.notice p b { color: var(--ink); font-weight: 600; }
+.btn {
+  border: 1px solid var(--line); background: var(--surface); border-radius: 10px;
+  padding: 9px 14px; font-size: 14px; font-weight: 500; min-height: 40px;
+}
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.quiet { border-color: transparent; background: transparent; color: var(--accent); }
+
+/* ---------- page stack ---------- */
+main {
+  padding-block: 16px 40vh;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.stack { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.page {
+  position: relative; width: 100%; max-width: var(--page-max);
+  background: var(--paper); box-shadow: var(--shadow);
+  overflow: hidden; touch-action: pan-x pan-y pinch-zoom;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+/* inputs inside the unselectable page must stay typeable on iPad Safari */
+.page input { -webkit-user-select: text; user-select: text; }
+.page .pno {
+  position: absolute; right: 8px; top: 6px; z-index: 1; font-size: 11px; color: var(--muted);
+  background: var(--surface); border-radius: 6px; padding: 1px 6px; opacity: .85;
+  font-variant-numeric: tabular-nums; pointer-events: none;
+}
+.page img.pimg, .page canvas.pimg { position: absolute; display: block; max-width: none; pointer-events: none; }
+.page svg.ink { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.page .spin {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  color: var(--muted); font-size: 13px; background: var(--paper);
+}
+.layer { position: absolute; inset: 0; }
+
+/* blanks in edit mode: a highlighter stroke over the word */
+.hl {
+  position: absolute; background: var(--mark); border-bottom: 2px solid var(--mark-edge);
+  border-radius: 2px; mix-blend-mode: multiply; pointer-events: none;
+}
+.hl.sel { background: var(--mark-active); border-bottom-color: var(--mark-active-edge); }
+.drag { position: absolute; background: var(--mark-active); pointer-events: none; border-radius: 2px; }
+
+/* blanks in practice mode: paper-colored cover with a printed rule */
+.cover {
+  position: absolute; background: var(--paper); border-bottom: 1.5px solid var(--paper-rule);
+  display: flex; align-items: center; overflow: visible; cursor: text;
+  transition: opacity .35s ease;
+}
+.cover.cont { border-bottom-style: dashed; }
+.cover input {
+  position: absolute; left: 0; top: 50%; width: 100%; height: 22px; margin-top: -11px;
+  border: 0; padding: 0 2px; background: transparent; outline: none;
+  font-family: var(--font-paper); font-size: 16px; line-height: 22px; color: var(--paper-ink);
+  transform-origin: left center; caret-color: var(--paper-rule);
+}
+.cover input::placeholder { color: rgba(42, 92, 176, .45); }
+.cover.active { box-shadow: 0 0 0 2px rgba(42, 92, 176, .28); border-radius: 2px; }
+.cover.wrong input { color: var(--paper-bad); }
+.cover.wrong { border-bottom-color: var(--paper-bad); animation: shake .32s; }
+.cover.done { opacity: 0; pointer-events: none; }
+@keyframes shake { 0%,100% { translate: 0 } 25% { translate: -3px 0 } 75% { translate: 3px 0 } }
+.tick {
+  position: absolute; pointer-events: none; border-bottom: 2px solid var(--paper-ok);
+  opacity: .75;
+}
+.tick.shown { border-bottom-color: var(--paper-bad); border-bottom-style: dotted; }
+.tick::after {
+  content: ""; position: absolute; right: -9px; top: -7px; width: 8px; height: 8px;
+  border-radius: 50%; background: var(--paper-ok);
+}
+.tick.shown::after { background: var(--paper-bad); }
+.tick:not(.end)::after { display: none; }
+@media (prefers-reduced-motion: reduce) { .cover, .cover.wrong { transition: none; animation: none; } }
+
+/* inline helper under the active blank */
+.assist {
+  position: absolute; z-index: 5; display: flex; gap: 6px; padding: 5px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: var(--shadow); font-size: 13px; white-space: nowrap;
+}
+.assist button { border: 0; background: var(--accent-soft); color: var(--ink); border-radius: 7px; padding: 6px 10px; min-height: 32px; }
+
+/* ---------- edit popover ---------- */
+.pop {
+  position: absolute; z-index: 6; width: min(340px, calc(100% - 16px));
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 14px; box-shadow: var(--shadow); padding: 12px; display: grid; gap: 10px;
+}
+.pop label { font-size: 12px; color: var(--muted); letter-spacing: .03em; }
+.pop .ans {
+  width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 9px;
+  padding: 8px 10px; font-size: 16px; font-family: var(--font-paper); background: var(--surface);
+}
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chips button {
+  border: 1px solid var(--line); background: var(--surface); border-radius: 7px;
+  min-width: 34px; height: 36px; padding: 0 6px; font-family: var(--font-paper); font-size: 17px;
+}
+.chips button.on { background: var(--mark); border-color: var(--mark-edge); color: var(--paper-ink); }
+.pop .row { display: flex; flex-wrap: wrap; gap: 6px; }
+.pop .row .btn { padding: 7px 11px; min-height: 36px; font-size: 13px; }
+.pop .row .grow { flex: 1; }
+.btn.danger { color: var(--paper-bad); }
+.hint { font-size: 12px; color: var(--muted); line-height: 1.45; margin: 0; }
+
+/* ---------- sheet (files / list) ---------- */
+.sheet-bg { position: fixed; inset: 0; z-index: 40; background: rgba(10, 14, 20, .38); }
+.sheet {
+  position: fixed; z-index: 41; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 56px);
+  translate: -50% 0; width: min(560px, calc(100% - 24px)); max-height: calc(100% - 90px);
+  overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: var(--shadow); padding: 18px; display: grid; gap: 14px; box-sizing: border-box;
+}
+.sheet h2 { margin: 0; padding-right: 40px; font-size: 18px; font-weight: 600; text-wrap: balance; }
+.sheet .x { position: absolute; right: 8px; top: 8px; }
+.sheet .row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.sheet .row .btn:disabled { opacity: .45; cursor: default; }
+.sheet h3 { margin: 0; font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .06em; }
+.slot {
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px;
+  padding: 12px; border: 1px dashed var(--line); border-radius: 12px;
+}
+.slot.ok { border-style: solid; border-color: var(--accent); background: var(--accent-soft); }
+.slot b { font-weight: 600; font-size: 15px; }
+.slot small { grid-column: 1; color: var(--muted); font-size: 12.5px; line-height: 1.45; min-width: 0; overflow-wrap: anywhere; }
+.slot .btn { grid-row: 1 / span 2; grid-column: 2; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--accent); }
+.err { color: var(--paper-bad); font-size: 13.5px; margin: 0; }
+.plist { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.plist button {
+  width: 100%; display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center;
+  border: 0; background: transparent; padding: 10px 8px; border-radius: 9px; text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+.plist button:hover { background: var(--accent-soft); }
+.plist .pg { font-weight: 600; }
+.plist .meta { color: var(--muted); font-size: 13px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plist .st { font-size: 12.5px; color: var(--muted); }
+.jump { display: flex; gap: 8px; }
+.jump input { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 16px; background: var(--surface); }
+.toast {
+  position: fixed; z-index: 50; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
+  translate: -50% 0; max-width: calc(100% - 32px); box-sizing: border-box;
+  background: var(--ink); color: var(--desk); border-radius: 12px; padding: 11px 16px;
+  font-size: 14px; box-shadow: var(--shadow); display: flex; gap: 12px; align-items: center;
+}
+.toast button { border: 0; background: transparent; color: var(--desk); font-weight: 600; text-decoration: underline; }
+@media (max-width: 560px) {
+  .bar .book b { font-size: 13px; }
+  .seg button { padding: 7px 11px; }
+  .score { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="book">
+    <b id="bookName">예시 페이지</b>
+    <button id="pageInd" type="button" aria-label="페이지 이동">1 / 1</button>
+  </div>
+  <div class="seg" role="group" aria-label="모드">
+    <button id="modeEdit" type="button" aria-pressed="true">만들기</button>
+    <button id="modeQuiz" type="button" aria-pressed="false">풀기</button>
+  </div>
+  <div class="tools">
+    <span class="score" id="score"></span>
+    <button class="icon" id="undoBtn" type="button" aria-label="되돌리기" title="되돌리기" disabled>
+      <svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+    </button>
+    <button class="icon" id="listBtn" type="button" aria-label="빈칸 목록" title="빈칸 목록">
+      <svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01" stroke-width="3"/></svg>
+    </button>
+    <button class="icon" id="filesBtn" type="button" aria-label="파일 열기" title="파일 열기">
+      <svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <div class="notice" id="notice">
+    <p id="noticeText"><b>예시 페이지예요.</b> 만들기에서 단어를 탭하면 빈칸이 생기고, 풀기에서 키보드로 답을 입력해요. <b>PDF 열기</b>를 눌러 내 PDF를 고르면 책 전체로 바뀌어요.</p>
+    <button class="btn primary" id="openFiles" type="button">PDF 열기</button>
+  </div>
+  <div class="stack" id="stack"></div>
+</main>
+
+<input type="file" id="quickInput" accept=".pdf,application/pdf,.json,application/json" multiple hidden>
+<input type="file" id="pdfInput" accept=".pdf,application/pdf" hidden>
+<input type="file" id="ocrInput" hidden>
+<input type="file" id="backupInput" hidden>
+<script>
+'use strict';
+/* ================= Minimal PDF reader =================
+   Scanned books are a full-page JPEG per page (plus an invisible OCR text layer).
+   Instead of a full PDF renderer, this reads the page's JPEG bytes straight out of
+   the file and lets the browser decode them natively; handwriting (vector strokes)
+   is redrawn as SVG. Bytes are read lazily with File.slice, so a 350MB PDF never
+   has to sit in memory. */
+class PdfError extends Error {}
+class Ref { constructor(n, g) { this.n = n; this.g = g; } }
+const isRef = v => v instanceof Ref;
+const isDelim = c => c <= 32 || c === 40 || c === 41 || c === 60 || c === 62 || c === 91 || c === 93 || c === 123 || c === 125 || c === 47 || c === 37;
+const NUM_RE = /^[+-]?(\d+\.?\d*|\.\d+)$/;
+
+class Lexer {
+  constructor(buf, pos = 0) { this.b = buf; this.p = pos; }
+  skipWs() {
+    const b = this.b;
+    for (;;) {
+      while (this.p < b.length && b[this.p] <= 32) this.p++;
+      if (this.p < b.length && b[this.p] === 37) {
+        while (this.p < b.length && b[this.p] !== 10 && b[this.p] !== 13) this.p++;
+      } else return;
+    }
+  }
+  latin(s, e) {
+    let r = '';
+    for (let i = s; i < e; i += 8192) r += String.fromCharCode.apply(null, this.b.subarray(i, Math.min(e, i + 8192)));
+    return r;
+  }
+  token() {
+    this.skipWs();
+    const b = this.b, p = this.p;
+    if (p >= b.length) throw new PdfError('EOF');
+    const c = b[p];
+    if (c === 60) {
+      if (b[p + 1] === 60) { this.p += 2; return { t: '<<' }; }
+      let e = p + 1; while (e < b.length && b[e] !== 62) e++;
+      if (e >= b.length) throw new PdfError('EOF');
+      this.p = e + 1; return { t: 'str', v: this.latin(p + 1, e) };
+    }
+    if (c === 62) { if (b[p + 1] === 62) { this.p += 2; return { t: '>>' }; } this.p++; return { t: 'kw', v: '>' }; }
+    if (c === 91) { this.p++; return { t: '[' }; }
+    if (c === 93) { this.p++; return { t: ']' }; }
+    if (c === 123 || c === 125) { this.p++; return { t: 'kw', v: String.fromCharCode(c) }; }
+    if (c === 47) {
+      let e = p + 1; while (e < b.length && !isDelim(b[e])) e++;
+      this.p = e; return { t: 'name', v: '/' + this.latin(p + 1, e) };
+    }
+    if (c === 40) {
+      let depth = 0, e = p;
+      for (; e < b.length; e++) {
+        const ch = b[e];
+        if (ch === 92) { e++; continue; }
+        if (ch === 40) depth++;
+        else if (ch === 41 && --depth === 0) break;
+      }
+      if (e >= b.length) throw new PdfError('EOF');
+      this.p = e + 1; return { t: 'str', v: this.latin(p + 1, e) };
+    }
+    let e = p; while (e < b.length && !isDelim(b[e])) e++;
+    if (e === p) { this.p++; return { t: 'kw', v: String.fromCharCode(c) }; }
+    const s = this.latin(p, e); this.p = e;
+    return NUM_RE.test(s) ? { t: 'num', v: parseFloat(s) } : { t: 'kw', v: s };
+  }
+}
+
+function parseValue(lx, tok) {
+  tok = tok || lx.token();
+  switch (tok.t) {
+    case 'num': {
+      const save = lx.p;
+      try {
+        const t2 = lx.token();
+        if (t2.t === 'num') { const t3 = lx.token(); if (t3.t === 'kw' && t3.v === 'R') return new Ref(tok.v, t2.v); }
+      } catch (e) { if (!(e instanceof PdfError)) throw e; }
+      lx.p = save; return tok.v;
+    }
+    case 'name': case 'str': return tok.v;
+    case '[': { const a = []; for (;;) { const t = lx.token(); if (t.t === ']') return a; a.push(parseValue(lx, t)); } }
+    case '<<': {
+      const d = {};
+      for (;;) {
+        const t = lx.token();
+        if (t.t === '>>') return d;
+        if (t.t !== 'name') throw new PdfError('bad dictionary');
+        d[t.v.slice(1)] = parseValue(lx);
+      }
+    }
+    case 'kw': return tok.v === 'true' ? true : tok.v === 'false' ? false : tok.v === 'null' ? null : { kw: tok.v };
+    default: throw new PdfError('unexpected ' + tok.t);
+  }
+}
+
+async function inflate(u8) {
+  const rd = new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate')).getReader();
+  const parts = []; let n = 0;
+  try { for (;;) { const { done, value } = await rd.read(); if (done) break; parts.push(value); n += value.length; } }
+  catch (e) { if (!n) throw e; }
+  const out = new Uint8Array(n); let o = 0;
+  for (const p of parts) { out.set(p, o); o += p.length; }
+  return out;
+}
+
+const mul = (m, n) => [m[0] * n[0] + m[1] * n[2], m[0] * n[1] + m[1] * n[3], m[2] * n[0] + m[3] * n[2], m[2] * n[1] + m[3] * n[3], m[4] * n[0] + m[5] * n[2] + n[4], m[4] * n[1] + m[5] * n[3] + n[5]];
+const hex2 = v => Math.round(Math.max(0, Math.min(1, +v || 0)) * 255).toString(16).padStart(2, '0');
+const rgbHex = o => '#' + hex2(o[0]) + hex2(o[1]) + hex2(o[2]);
+const grayHex = g => rgbHex([g, g, g]);
+const cmykHex = o => rgbHex([(1 - o[0]) * (1 - o[3]), (1 - o[1]) * (1 - o[3]), (1 - o[2]) * (1 - o[3])]);
+const colorN = (o, n) => { const v = o.filter(x => typeof x === 'number'); return n === 1 ? grayHex(v[0] || 0) : n === 4 ? cmykHex(v) : rgbHex(v.length >= 3 ? v : [0, 0, 0]); };
+const BLEND = { '/Multiply': 'multiply', '/Screen': 'screen', '/Darken': 'darken', '/Lighten': 'lighten', '/Overlay': 'overlay' };
+
+class PdfDoc {
+  constructor(file) { this.file = file; this.size = file.size; this.xref = new Map(); this.cache = new Map(); }
+  async bytes(pos, len) { return new Uint8Array(await this.file.slice(pos, Math.min(this.size, pos + len)).arrayBuffer()); }
+
+  async open() {
+    const tl = Math.min(this.size, 4096);
+    const tail = await this.bytes(this.size - tl, tl);
+    const ts = new Lexer(tail).latin(0, tail.length);
+    const at = ts.lastIndexOf('startxref');
+    if (at < 0) throw new PdfError('PDF 파일이 아니거나 손상된 것 같아요.');
+    let pos = parseInt(ts.slice(at + 9).trim(), 10), trailer = null;
+    const seen = new Set();
+    while (Number.isFinite(pos) && !seen.has(pos)) {
+      seen.add(pos);
+      const t = await this.readXref(pos);
+      trailer = trailer || t;
+      pos = typeof t.Prev === 'number' ? t.Prev : NaN;
+    }
+    this.trailer = trailer;
+    this.id = Array.isArray(trailer.ID) && trailer.ID[0] ? String(trailer.ID[0]).toLowerCase() : '';
+    const root = await this.get(trailer.Root);
+    this.pages = await this.collect(root.Pages, {});
+    return this;
+  }
+
+  async readXref(pos) {
+    let len = 1 << 20;
+    for (;;) {
+      const lx = new Lexer(await this.bytes(pos, len));
+      try {
+        const t = lx.token();
+        if (t.t !== 'kw' || t.v !== 'xref') throw new PdfError('이 PDF는 압축된 목록 형식(PDF 1.5 xref stream)이라 아직 열 수 없어요.');
+        const found = [];
+        for (;;) {
+          const a = lx.token();
+          if (a.t === 'kw' && a.v === 'trailer') {
+            const trailer = parseValue(lx);
+            for (const [num, off] of found) if (!this.xref.has(num)) this.xref.set(num, off);
+            return trailer;
+          }
+          const start = a.v, cnt = lx.token().v;
+          for (let i = 0; i < cnt; i++) {
+            const off = lx.token().v; lx.token(); const ty = lx.token().v;
+            if (ty === 'n') found.push([start + i, off]);
+          }
+        }
+      } catch (e) {
+        if (e instanceof PdfError && e.message === 'EOF' && pos + len < this.size) { len *= 4; continue; }
+        throw e;
+      }
+    }
+  }
+
+  async get(v) {
+    if (!isRef(v)) return v;
+    if (this.cache.has(v.n)) return this.cache.get(v.n);
+    const off = this.xref.get(v.n);
+    if (off == null) return null;
+    let len = 4096;
+    for (;;) {
+      const buf = await this.bytes(off, len), lx = new Lexer(buf);
+      try {
+        lx.token(); lx.token();
+        if (lx.token().v !== 'obj') throw new PdfError('object ' + v.n + ' not found');
+        const val = parseValue(lx);
+        if (val && typeof val === 'object' && !Array.isArray(val) && !isRef(val)) {
+          const save = lx.p, t = lx.token();
+          if (t.t === 'kw' && t.v === 'stream') {
+            let p = lx.p; if (buf[p] === 13) p++; if (buf[p] === 10) p++;
+            val.__start = off + p;
+          } else lx.p = save;
+        }
+        this.cache.set(v.n, val);
+        return val;
+      } catch (e) {
+        if (e instanceof PdfError && e.message === 'EOF' && off + len < this.size) { len *= 8; continue; }
+        throw e;
+      }
+    }
+  }
+
+  async collect(ref, inh) {
+    const node = await this.get(ref);
+    if (!node) return [];
+    const cur = {
+      res: node.Resources !== undefined ? node.Resources : inh.res,
+      box: node.CropBox || node.MediaBox || inh.box,
+      rot: node.Rotate !== undefined ? node.Rotate : inh.rot,
+    };
+    if (node.Type === '/Pages' || (node.Kids && node.Type !== '/Page')) {
+      const kids = (await this.get(node.Kids)) || [];
+      const parts = await Promise.all(kids.map(k => this.collect(k, cur)));
+      return parts.flat();
+    }
+    const raw = (await this.get(cur.box)) || [0, 0, 612, 792];
+    const b = await Promise.all(raw.map(x => this.get(x)));
+    return [{ node, res: cur.res, rot: ((await this.get(cur.rot)) || 0) % 360,
+      box: [Math.min(b[0], b[2]), Math.min(b[1], b[3]), Math.max(b[0], b[2]), Math.max(b[1], b[3])] }];
+  }
+
+  async filters(d) { const f = await this.get(d.Filter); return Array.isArray(f) ? f : f ? [f] : []; }
+  async raw(d) { return this.bytes(d.__start, await this.get(d.Length)); }
+  async decoded(d) {
+    let data = await this.raw(d);
+    for (const f of await this.filters(d)) {
+      if (f === '/FlateDecode' || f === '/Fl') data = await inflate(data);
+      else throw new PdfError('unsupported filter ' + f);
+    }
+    return data;
+  }
+  async jpegBlob(d) { const len = await this.get(d.Length); return this.file.slice(d.__start, d.__start + len, 'image/jpeg'); }
+
+  async csN(name, cspaces) {
+    let cs = typeof name === 'string' && name[0] === '/' && cspaces && cspaces[name.slice(1)] !== undefined ? await this.get(cspaces[name.slice(1)]) : name;
+    if (cs === '/DeviceGray' || cs === '/CalGray' || cs === '/G') return 1;
+    if (cs === '/DeviceCMYK' || cs === '/CMYK') return 4;
+    if (Array.isArray(cs)) {
+      if (cs[0] === '/ICCBased') { const s = await this.get(cs[1]); return (s && await this.get(s.N)) || 3; }
+      if (cs[0] === '/CalGray' || cs[0] === '/Indexed' || cs[0] === '/Separation') return 1;
+      if (cs[0] === '/DeviceN') return ((await this.get(cs[1])) || [0]).length;
+    }
+    return 3;
+  }
+
+  /** Images (with placement) and vector paths of one page, in page space. */
+  async pageOps(pg) {
+    if (pg.ops) return pg.ops;
+    const contents = await this.get(pg.node.Contents);
+    const list = Array.isArray(contents) ? await Promise.all(contents.map(c => this.get(c))) : contents ? [contents] : [];
+    const chunks = await Promise.all(list.map(s => this.decoded(s)));
+    const data = new Uint8Array(chunks.reduce((n, c) => n + c.length + 1, 0));
+    let o = 0; for (const c of chunks) { data.set(c, o); o += c.length; data[o++] = 10; }
+    const out = { imgs: [], paths: [] };
+    await this.run(data, await this.get(pg.res), [1, 0, 0, 1, 0, 0], out, 0);
+    pg.ops = out;
+    return out;
+  }
+
+  async run(data, res, ctm0, out, depth) {
+    res = res || {};
+    const xobjs = (await this.get(res.XObject)) || {};
+    const gstates = (await this.get(res.ExtGState)) || {};
+    const cspaces = (await this.get(res.ColorSpace)) || {};
+    const lx = new Lexer(data);
+    let st = { ctm: ctm0, lw: 1, cap: 0, join: 0, sc: '#000000', fc: '#000000', sa: 1, fa: 1, bm: 'normal', scs: 1, fcs: 1 };
+    const stack = [];
+    let ops = [], path = '', inText = false, cx = 0, cy = 0;
+    const r2 = n => Math.round(n * 100) / 100;
+    const P = (x, y) => { const m = st.ctm; return r2(m[0] * x + m[2] * y + m[4]) + ' ' + r2(m[1] * x + m[3] * y + m[5]); };
+    const paint = (stroke, fill, eo, close) => {
+      if (path) {
+        const m = st.ctm, k = Math.sqrt(Math.abs(m[0] * m[3] - m[1] * m[2])) || 1;
+        out.paths.push({ d: path + (close ? 'Z' : ''), stroke: stroke ? st.sc : null, fill: fill ? st.fc : null, eo,
+          lw: Math.max(st.lw * k, .25), sa: st.sa, fa: st.fa, bm: st.bm, cap: st.cap, join: st.join });
+      }
+      path = '';
+    };
+    for (;;) {
+      let t;
+      try { t = lx.token(); } catch (e) { if (e instanceof PdfError) break; throw e; }
+      if (t.t !== 'kw') {
+        if (!inText) ops.push(t.t === '[' || t.t === '<<' ? parseValue(lx, t) : t.v);
+        continue;
+      }
+      const op = t.v;
+      if (inText) { if (op === 'ET') inText = false; continue; }
+      switch (op) {
+        case 'BT': inText = true; break;
+        case 'q': stack.push(st); st = { ...st }; break;
+        case 'Q': if (stack.length) st = stack.pop(); break;
+        case 'cm': st.ctm = mul(ops.slice(-6), st.ctm); break;
+        case 'w': st.lw = ops[0]; break;
+        case 'J': st.cap = ops[0]; break;
+        case 'j': st.join = ops[0]; break;
+        case 'gs': {
+          const g = await this.get(gstates[String(ops[0]).slice(1)]);
+          if (g) {
+            if (typeof g.CA === 'number') st.sa = g.CA;
+            if (typeof g.ca === 'number') st.fa = g.ca;
+            if (typeof g.LW === 'number') st.lw = g.LW;
+            if (g.BM) st.bm = BLEND[Array.isArray(g.BM) ? g.BM[0] : g.BM] || 'normal';
+          }
+          break;
+        }
+        case 'RG': st.sc = rgbHex(ops); st.scs = 3; break;
+        case 'rg': st.fc = rgbHex(ops); st.fcs = 3; break;
+        case 'G': st.sc = grayHex(ops[0]); st.scs = 1; break;
+        case 'g': st.fc = grayHex(ops[0]); st.fcs = 1; break;
+        case 'K': st.sc = cmykHex(ops); st.scs = 4; break;
+        case 'k': st.fc = cmykHex(ops); st.fcs = 4; break;
+        case 'CS': st.scs = await this.csN(ops[0], cspaces); st.sc = '#000000'; break;
+        case 'cs': st.fcs = await this.csN(ops[0], cspaces); st.fc = '#000000'; break;
+        case 'SC': case 'SCN': st.sc = colorN(ops, st.scs); break;
+        case 'sc': case 'scn': st.fc = colorN(ops, st.fcs); break;
+        case 'm': path += 'M' + P(ops[0], ops[1]); cx = ops[0]; cy = ops[1]; break;
+        case 'l': path += 'L' + P(ops[0], ops[1]); cx = ops[0]; cy = ops[1]; break;
+        case 'c': path += 'C' + P(ops[0], ops[1]) + ' ' + P(ops[2], ops[3]) + ' ' + P(ops[4], ops[5]); cx = ops[4]; cy = ops[5]; break;
+        case 'v': path += 'C' + P(cx, cy) + ' ' + P(ops[0], ops[1]) + ' ' + P(ops[2], ops[3]); cx = ops[2]; cy = ops[3]; break;
+        case 'y': path += 'C' + P(ops[0], ops[1]) + ' ' + P(ops[2], ops[3]) + ' ' + P(ops[2], ops[3]); cx = ops[2]; cy = ops[3]; break;
+        case 'h': path += 'Z'; break;
+        case 're': {
+          const [x, y, w, h] = ops;
+          path += 'M' + P(x, y) + 'L' + P(x + w, y) + 'L' + P(x + w, y + h) + 'L' + P(x, y + h) + 'Z';
+          break;
+        }
+        case 'S': paint(true, false, false, false); break;
+        case 's': paint(true, false, false, true); break;
+        case 'f': case 'F': paint(false, true, false, false); break;
+        case 'f*': paint(false, true, true, false); break;
+        case 'B': paint(true, true, false, false); break;
+        case 'B*': paint(true, true, true, false); break;
+        case 'b': paint(true, true, false, true); break;
+        case 'b*': paint(true, true, true, true); break;
+        case 'n': path = ''; break;
+        case 'Do': {
+          const ref = xobjs[String(ops[0]).slice(1)];
+          const xo = await this.get(ref);
+          if (!xo) break;
+          if (xo.Subtype === '/Image') out.imgs.push({ d: xo, ctm: st.ctm.slice() });
+          else if (xo.Subtype === '/Form' && depth < 8) {
+            const m = (await this.get(xo.Matrix)) || [1, 0, 0, 1, 0, 0];
+            await this.run(await this.decoded(xo), (await this.get(xo.Resources)) || res, mul(m, st.ctm), out, depth + 1);
+          }
+          break;
+        }
+        case 'BI': {
+          const b = lx.b; let i = lx.p;
+          while (i < b.length - 2 && !(b[i] === 69 && b[i + 1] === 73 && b[i - 1] <= 32 && b[i + 2] <= 32)) i++;
+          lx.p = i + 2;
+          break;
+        }
+      }
+      ops = [];
+    }
+  }
+
+  /** Bytes of the first embedded file whose name matches `test`, or null. */
+  async embedded(test) {
+    const cat = await this.get(this.trailer.Root);
+    const names = cat && await this.get(cat.Names);
+    const tree = names && await this.get(names.EmbeddedFiles);
+    if (!tree) return null;
+    const found = [];
+    const walk = async (node, depth) => {
+      node = await this.get(node);
+      if (!node || depth > 8) return;
+      const arr = await this.get(node.Names);
+      if (Array.isArray(arr)) for (let i = 0; i + 1 < arr.length; i += 2) found.push([String(arr[i]), arr[i + 1]]);
+      const kids = await this.get(node.Kids);
+      if (Array.isArray(kids)) for (const k of kids) await walk(k, depth + 1);
+    };
+    await walk(tree, 0);
+    for (const [name, ref] of found) {
+      if (!test.test(name)) continue;
+      const spec = await this.get(ref);
+      const ef = spec && await this.get(spec.EF);
+      const stream = ef && await this.get(ef.F || ef.UF);
+      if (stream && stream.__start != null) return this.decoded(stream);
+    }
+    return null;
+  }
+
+  /** Raw 8-bit samples of a Flate image (1 or 8 bits, 1 or 3 components). */
+  async samples(d) {
+    const w = await this.get(d.Width), h = await this.get(d.Height);
+    const bpc = (await this.get(d.BitsPerComponent)) || 8;
+    const n = d.ImageMask ? 1 : await this.csN(await this.get(d.ColorSpace) || '/DeviceGray', {});
+    const src = await this.decoded(d);
+    const dec = (await this.get(d.Decode)) || null;
+    const inv = dec && dec[0] > dec[1];
+    const out = new Uint8Array(w * h * n);
+    if (bpc === 8) out.set(src.subarray(0, out.length));
+    else if (bpc === 1) {
+      const row = Math.ceil(w / 8);
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) out[y * w + x] = (src[y * row + (x >> 3)] >> (7 - (x & 7))) & 1 ? 255 : 0;
+    } else throw new PdfError('unsupported bits ' + bpc);
+    if (inv) for (let i = 0; i < out.length; i++) out[i] = 255 - out[i];
+    return { w, h, n, data: out };
+  }
+}
+
+/* ================= Page drawing ================= */
+const SVGNS = 'http://www.w3.org/2000/svg';
+const isJpegFilter = fl => fl.length === 1 && (fl[0] === '/DCTDecode' || fl[0] === '/DCT');
+
+/** Draw one PDF page into `host` as <img>/<canvas> + SVG ink. Resolves a handle. */
+async function drawPdfPage(pdf, i, host) {
+  const pg = pdf.pages[i];
+  const ops = await pdf.pageOps(pg);
+  const [x0, y0, x1, y1] = pg.box, W = x1 - x0, H = y1 - y0;
+  const urls = [];
+  let main = null, mainRect = null, mainArea = 0;
+  for (const im of ops.imgs) {
+    const [a, b, c, d, e, f] = im.ctm;
+    if (Math.abs(b) > 1e-3 || Math.abs(c) > 1e-3) continue;
+    const fl = await pdf.filters(im.d);
+    let el;
+    if (isJpegFilter(fl) && !im.d.SMask) {
+      const url = URL.createObjectURL(await pdf.jpegBlob(im.d));
+      urls.push(url);
+      el = new Image(); el.alt = ''; el.decoding = 'async'; el.src = url;
+    } else {
+      try { el = await compositeImage(pdf, im.d); } catch (err) { console.warn('image skipped', err); continue; }
+    }
+    const r = { l: (Math.min(e, e + a) - x0) / W, t: (y1 - Math.max(f, f + d)) / H, w: Math.abs(a) / W, h: Math.abs(d) / H };
+    el.className = 'pimg';
+    Object.assign(el.style, { left: r.l * 100 + '%', top: r.t * 100 + '%', width: r.w * 100 + '%', height: r.h * 100 + '%' });
+    const flip = (a < 0 ? 'scaleX(-1) ' : '') + (d < 0 ? 'scaleY(-1)' : '');
+    if (flip) el.style.transform = flip;
+    host.appendChild(el);
+    if (el.tagName === 'IMG' && Math.abs(a * d) > mainArea) { mainArea = Math.abs(a * d); main = el; mainRect = r; }
+  }
+  if (ops.paths.length) host.appendChild(inkSvg(ops.paths, pg.box));
+  if (main) { try { await main.decode(); } catch (e) { /* drawn when ready */ } }
+  return { main, mainRect, release() { for (const u of urls) URL.revokeObjectURL(u); } };
+}
+
+/** Images with a soft mask (or raw Flate data) are composited on a canvas. */
+async function compositeImage(pdf, d) {
+  const W = await pdf.get(d.Width), H = await pdf.get(d.Height);
+  const k = Math.min(1, 2400 / Math.max(W, H));
+  const cw = Math.max(1, Math.round(W * k)), ch = Math.max(1, Math.round(H * k));
+  const cv = document.createElement('canvas');
+  cv.width = cw; cv.height = ch;
+  const ctx = cv.getContext('2d');
+  if (isJpegFilter(await pdf.filters(d))) {
+    const url = URL.createObjectURL(await pdf.jpegBlob(d));
+    try { const img = new Image(); img.src = url; await img.decode(); ctx.drawImage(img, 0, 0, cw, ch); }
+    finally { URL.revokeObjectURL(url); }
+  } else {
+    const s = await pdf.samples(d);
+    const id = new ImageData(s.w, s.h);
+    for (let p = 0, j = 0; p < s.w * s.h; p++) {
+      const o = p * s.n, r = s.data[o];
+      id.data[j++] = r; id.data[j++] = s.n >= 3 ? s.data[o + 1] : r; id.data[j++] = s.n >= 3 ? s.data[o + 2] : r; id.data[j++] = 255;
+    }
+    const tmp = document.createElement('canvas');
+    tmp.width = s.w; tmp.height = s.h; tmp.getContext('2d').putImageData(id, 0, 0);
+    ctx.drawImage(tmp, 0, 0, cw, ch);
+  }
+  const sm = await pdf.get(d.SMask);
+  if (sm) {
+    try {
+      const m = await pdf.samples(sm);
+      const px = ctx.getImageData(0, 0, cw, ch);
+      for (let y = 0; y < ch; y++) {
+        const row = Math.min(m.h - 1, Math.floor(y * m.h / ch)) * m.w;
+        for (let x = 0; x < cw; x++) px.data[(y * cw + x) * 4 + 3] = m.data[row + Math.min(m.w - 1, Math.floor(x * m.w / cw))];
+      }
+      ctx.putImageData(px, 0, 0);
+    } catch (err) { console.warn('mask skipped', err); }
+  }
+  return cv;
+}
+
+function inkSvg(paths, box) {
+  const [x0, y0, x1, y1] = box;
+  const svg = document.createElementNS(SVGNS, 'svg');
+  svg.setAttribute('class', 'ink');
+  svg.setAttribute('viewBox', `${x0} ${y0} ${x1 - x0} ${y1 - y0}`);
+  svg.setAttribute('preserveAspectRatio', 'none');
+  const g = document.createElementNS(SVGNS, 'g');
+  g.setAttribute('transform', `matrix(1 0 0 -1 0 ${y0 + y1})`);
+  for (const p of paths) {
+    const el = document.createElementNS(SVGNS, 'path');
+    el.setAttribute('d', p.d);
+    el.setAttribute('fill', p.fill || 'none');
+    if (p.fill) { el.setAttribute('fill-opacity', p.fa); if (p.eo) el.setAttribute('fill-rule', 'evenodd'); }
+    if (p.stroke) {
+      el.setAttribute('stroke', p.stroke); el.setAttribute('stroke-width', p.lw); el.setAttribute('stroke-opacity', p.sa);
+      el.setAttribute('stroke-linecap', ['butt', 'round', 'square'][p.cap] || 'butt');
+      el.setAttribute('stroke-linejoin', ['miter', 'round', 'bevel'][p.join] || 'miter');
+    }
+    if (p.bm !== 'normal') el.style.mixBlendMode = p.bm;
+    g.appendChild(el);
+  }
+  svg.appendChild(g);
+  return svg;
+}
+
+/* ================= Word geometry (from the OCR file) =================
+   Each page: {w, h, L: [[top, height, x0, text, widths[]]]} in 1/10000 of the page. */
+function lineInfo(pg, li) {
+  pg._li = pg._li || [];
+  if (pg._li[li]) return pg._li[li];
+  const [y, h, x0, text, dl] = pg.L[li];
+  const ch = Array.from(text), xs = [x0];
+  for (let k = 0; k < ch.length; k++) xs.push(xs[k] + (dl[k] || 0));
+  return (pg._li[li] = { y, h, ch, xs });
+}
+const isSpace = c => /\s/.test(c);
+const EDGE_PUNCT = /^[\s.,:;!?·•ㆍ∙()[\]{}<>「」『』《》〈〉“”‘’"'※☞→←↔~…*]$/u;
+
+function hitChar(pg, fx, fy) {
+  const X = fx * 1e4, Y = fy * 1e4;
+  let best = -1, bd = Infinity;
+  for (let li = 0; li < pg.L.length; li++) {
+    const L = lineInfo(pg, li), x1 = L.xs[L.xs.length - 1];
+    const dy = Y < L.y ? L.y - Y : Y > L.y + L.h ? Y - (L.y + L.h) : 0;
+    const dx = X < L.xs[0] ? L.xs[0] - X : X > x1 ? X - x1 : 0;
+    const dist = dy * 1.6 + dx;
+    if (dist < bd) { bd = dist; best = li; }
+  }
+  if (best < 0 || bd > 140) return null;
+  const L = lineInfo(pg, best);
+  let ci = 0;
+  while (ci < L.ch.length - 1 && L.xs[ci + 1] <= X) ci++;
+  return { li: best, ci };
+}
+
+/** The whitespace-delimited word around char ci, minus edge punctuation: [s, e). */
+function wordAt(pg, li, ci) {
+  const L = lineInfo(pg, li);
+  if (isSpace(L.ch[ci])) return null;
+  let s = ci, e = ci + 1;
+  while (s > 0 && !isSpace(L.ch[s - 1])) s--;
+  while (e < L.ch.length && !isSpace(L.ch[e])) e++;
+  const ws = s, we = e;
+  while (s < e && EDGE_PUNCT.test(L.ch[s])) s++;
+  while (e > s && EDGE_PUNCT.test(L.ch[e - 1])) e--;
+  return s < e ? [s, e] : [ws, we];
+}
+
+function segText(pg, segs) {
+  return segs.map(([li, s, e]) => lineInfo(pg, li).ch.slice(s, e).join('')).join(' ').replace(/\s+/g, ' ').trim();
+}
+
+/** Page-fraction rectangles of a blank, padded so the cover hides the glyphs fully. */
+function segRects(pg, segs) {
+  return segs.map(([li, s, e]) => {
+    const L = lineInfo(pg, li);
+    const x = L.xs[s], w = L.xs[e] - L.xs[s];
+    const py = L.h * .2, px = 22;
+    return { x: (x - px) / 1e4, y: (L.y - py) / 1e4, w: (w + 2 * px) / 1e4, h: (L.h + 2 * py) / 1e4 };
+  });
+}
+
+function trimSegs(pg, segs) {
+  const out = [];
+  for (let [li, s, e] of segs) {
+    const L = lineInfo(pg, li);
+    while (s < e && isSpace(L.ch[s])) s++;
+    while (e > s && isSpace(L.ch[e - 1])) e--;
+    if (s < e) out.push([li, s, e]);
+  }
+  return out;
+}
+
+/** Characters between two hits in reading order, kept to one text column. */
+function rangeSegs(pg, a, b) {
+  if (a.li > b.li || (a.li === b.li && a.ci > b.ci)) [a, b] = [b, a];
+  if (a.li === b.li) return trimSegs(pg, [[a.li, a.ci, b.ci + 1]]);
+  const A = lineInfo(pg, a.li), B = lineInfo(pg, b.li);
+  const lo = Math.min(A.xs[0], B.xs[0]) - 300, hi = Math.max(A.xs[A.xs.length - 1], B.xs[B.xs.length - 1]) + 300;
+  const segs = [[a.li, a.ci, A.ch.length]];
+  for (let li = a.li + 1; li < b.li; li++) {
+    const L = lineInfo(pg, li);
+    if (L.xs[0] >= lo && L.xs[L.xs.length - 1] <= hi) segs.push([li, 0, L.ch.length]);
+  }
+  segs.push([b.li, 0, b.ci + 1]);
+  return trimSegs(pg, segs);
+}
+
+/** Extend a blank by one word to the left (dir -1) or right (dir +1). */
+function extendSegs(pg, segs, dir) {
+  segs = segs.map(s => s.slice());
+  if (dir < 0) {
+    const f = segs[0], L = lineInfo(pg, f[0]);
+    let s = f[1];
+    while (s > 0 && isSpace(L.ch[s - 1])) s--;
+    if (s === 0) {
+      if (f[0] === 0) return segs;
+      const pl = f[0] - 1, P = lineInfo(pg, pl);
+      let e = P.ch.length; while (e > 0 && isSpace(P.ch[e - 1])) e--;
+      let b = e; while (b > 0 && !isSpace(P.ch[b - 1])) b--;
+      return trimSegs(pg, [[pl, b, e], ...segs]);
+    }
+    while (s > 0 && !isSpace(L.ch[s - 1])) s--;
+    f[1] = s;
+  } else {
+    const l = segs[segs.length - 1], L = lineInfo(pg, l[0]);
+    let e = l[2];
+    while (e < L.ch.length && isSpace(L.ch[e])) e++;
+    if (e >= L.ch.length) {
+      if (l[0] >= pg.L.length - 1) return segs;
+      const nl = l[0] + 1, N = lineInfo(pg, nl);
+      let s = 0; while (s < N.ch.length && isSpace(N.ch[s])) s++;
+      let t = s; while (t < N.ch.length && !isSpace(N.ch[t])) t++;
+      return trimSegs(pg, [...segs, [nl, s, t]]);
+    }
+    while (e < L.ch.length && !isSpace(L.ch[e])) e++;
+    l[2] = e;
+  }
+  return trimSegs(pg, segs);
+}
+
+/* ================= Saving blanks =================
+   Blanks live in the viewer's private db space (synced between iPad and Mac),
+   mirrored to localStorage so a page still works when the db is unavailable. */
+const ls = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
+};
+
+const Store = {
+  db: null, uid: null, ready: null, local: {}, key: null,
+  timers: new Map(), busy: new Set(), again: new Set(), status: 'local', onStatus: () => {},
+
+  init() {
+    this.ready = (async () => {
+      try {
+        if (!window.claude || typeof window.claude.use !== 'function') return;
+        const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+        if (!db || !user) return;
+        const id = await user.id();
+        if (!id) return;
+        // people the page is shared with view-only cannot write; their blanks stay on their device
+        if ((await user.can('data.write')) === false) return;
+        this.db = db; this.uid = id; this.setStatus('synced');
+      } catch (e) { console.warn('db unavailable', e); }
+    })();
+    return this.ready;
+  },
+  setStatus(s) { this.status = s; this.onStatus(s); },
+  col() { return this.db.collection('data/users/' + this.uid); },
+  docId(p) { return `${this.key}_p${p + 1}`; },
+
+  loadLocal(key) {
+    this.key = key;
+    this.local = ls.get('blanks:' + key) || {};
+    return this.local;
+  },
+  /** Blanks saved to the account; null when there is nothing newer than this device. */
+  async loadRemote() {
+    const key = this.key;
+    await this.ready;
+    if (!this.db || key === 'demo') return null;
+    try {
+      const snap = await this.col().where('k', '==', key).limit(1000).get();
+      if (key !== this.key) return null;
+      if (snap.empty) {
+        for (const p of Object.keys(this.local)) this.queue(+p);
+        return null;
+      }
+      const remote = {};
+      for (const d of snap.docs) { const v = d.data(); if (v && Array.isArray(v.b) && v.b.length) remote[v.p] = v.b.map(b => ({ ...b, segs: b.segs.map(s => s.slice()) })); }
+      this.local = remote;
+      ls.set('blanks:' + key, remote);
+      return remote;
+    } catch (e) {
+      console.warn('db read failed', e);
+      this.setStatus('error');
+      return null;
+    }
+  },
+
+  save(p, blanks) {
+    if (blanks.length) this.local[p] = blanks; else delete this.local[p];
+    ls.set('blanks:' + this.key, this.local);
+    if (this.db && this.key !== 'demo') this.queue(p);
+  },
+  /** Swap every page's blanks at once (restoring a backup). */
+  replaceAll(map, oldPages) {
+    this.local = map;
+    ls.set('blanks:' + this.key, map);
+    if (this.db && this.key !== 'demo') for (const p of new Set([...oldPages, ...Object.keys(map).map(Number)])) this.queue(p);
+  },
+  queue(p) {
+    clearTimeout(this.timers.get(p));
+    this.setStatus('saving');
+    this.timers.set(p, setTimeout(() => this.flush(p), 700));
+  },
+  async flush(p) {
+    if (!this.db) return;
+    if (this.busy.has(p)) { this.again.add(p); return; }
+    this.busy.add(p);
+    try {
+      const ref = this.col().doc(this.docId(p)), b = this.local[p];
+      if (b && b.length) await ref.set({ k: this.key, p, b, t: Date.now() });
+      else await ref.delete();
+      if (!this.busy.size || this.busy.size === 1) this.setStatus('synced');
+    } catch (e) {
+      console.warn('db write failed', e);
+      const code = e && e.code;
+      if (code === 'invalid_argument' || code === 'not_granted' || code === 'revoked') {
+        // this viewer cannot write to the account: keep blanks on this device for the rest of the visit
+        this.db = null;
+        this.setStatus('local');
+      } else this.setStatus(code === 'quota_exceeded' ? 'full' : 'error');
+    } finally {
+      this.busy.delete(p);
+      if (this.again.delete(p)) this.flush(p);
+    }
+  },
+};
+
+/* ================= Remembering the opened files on this device ================= */
+const FileCache = {
+  open() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('yungwak-blanks', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('f');
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+  },
+  async get(k) {
+    try {
+      const db = await this.open();
+      return await new Promise((res, rej) => { const q = db.transaction('f').objectStore('f').get(k); q.onsuccess = () => res(q.result || null); q.onerror = () => rej(q.error); });
+    } catch (e) { return null; }
+  },
+  async put(k, v) {
+    try {
+      const db = await this.open();
+      await new Promise((res, rej) => {
+        const tx = db.transaction('f', 'readwrite');
+        tx.objectStore('f').put(v, k);
+        tx.oncomplete = res; tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error);
+      });
+      return true;
+    } catch (e) { console.warn('cache write failed', e); return false; }
+  },
+  async del(k) {
+    try {
+      const db = await this.open();
+      await new Promise(res => { const tx = db.transaction('f', 'readwrite'); tx.objectStore('f').delete(k); tx.oncomplete = res; tx.onerror = res; });
+    } catch (e) { /* nothing cached */ }
+  },
+};
+
+/* ================= Example page (shown before a PDF is opened) =================
+   A page drawn on a canvas in the book's layout, with word positions measured
+   while drawing, so it behaves exactly like an OCR'd scan. */
+const DEMO = [
+  ['title', '처분권주의'],
+  ['h1', 'Ⅰ. 의의 및 취지'],
+  ['p', '처분권주의란 소송의 개시, 심판의 대상과 범위, 그리고 소송의 종결에 대하여 당사자가 주도권을 가지고 자유롭게 결정할 수 있다는 원칙을 말한다. 법원은 당사자가 신청하지 아니한 사항에 대하여는 판결하지 못한다(제203조).'],
+  ['h1', 'Ⅱ. 내용'],
+  ['h2', '1. 절차의 개시'],
+  ['p', '민사소송은 원고의 소 제기로 비로소 시작되며, 법원이 직권으로 소송을 개시할 수는 없다.'],
+  ['h2', '2. 심판의 대상과 범위'],
+  ['p', '법원은 원고가 특정한 소송물에 구속되므로 신청한 범위를 넘어서 판결할 수 없다. 다만 신청한 것보다 적게 인용하는 일부인용 판결은 허용된다.'],
+  ['h2', '3. 절차의 종결'],
+  ['p', '당사자는 소의 취하, 청구의 포기·인낙, 재판상 화해에 의하여 판결에 의하지 아니하고 소송을 끝낼 수 있다.'],
+];
+const DEMO_BLANKS = [['처분권주의', 1], ['제203조', 0], ['일부인용', 0], ['소의 취하', 0]];
+
+async function buildDemoBook() {
+  const W = 513.7, H = 730.8, K = 2;
+  await Promise.race([
+    Promise.all([document.fonts.load('400 21px "Nanum Myeongjo"'), document.fonts.load('600 23px "IBM Plex Sans KR"')]),
+    new Promise(r => setTimeout(r, 2500)),
+  ]).catch(() => {});
+  const cv = document.createElement('canvas');
+  cv.width = Math.round(W * K); cv.height = Math.round(H * K);
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.scale(K, K);
+  const L = [], left = 64, right = W - 64, navy = '#1f3f7a', ink = '#22262c';
+  const serif = '"Nanum Myeongjo", "AppleMyungjo", Batang, serif';
+  const sans = '"IBM Plex Sans KR", "Apple SD Gothic Neo", sans-serif';
+  const put = (text, x, base, size) => {
+    const ws = Array.from(text).map(c => ctx.measureText(c).width);
+    ctx.fillText(text, x, base);
+    L.push([Math.round((base - size * .86) / H * 1e4), Math.round(size * 1.08 / H * 1e4), Math.round(x / W * 1e4), text, ws.map(w => Math.round(w / W * 1e4))]);
+  };
+  let y = 70;
+  for (const [kind, text] of DEMO) {
+    if (kind === 'title') {
+      ctx.strokeStyle = navy; ctx.lineWidth = 1.4;
+      ctx.strokeRect(left - 8, y - 22, right - left + 16, 38);
+      ctx.font = `400 16px ${sans}`; ctx.fillStyle = '#9aa3b2'; ctx.fillText('예시', left + 4, y + 3);
+      ctx.font = `600 18px ${sans}`; ctx.fillStyle = navy; put(text, left + 44, y + 4, 18);
+      y += 62;
+    } else if (kind === 'h1') {
+      ctx.font = `600 12.5px ${sans}`; ctx.fillStyle = navy; put(text, left, y, 12.5);
+      ctx.fillStyle = '#c9d2e3'; ctx.fillRect(left, y + 6, right - left, 1);
+      y += 28;
+    } else if (kind === 'h2') {
+      ctx.font = `600 11px ${sans}`; ctx.fillStyle = ink; put(text, left + 4, y, 11);
+      y += 20;
+    } else {
+      ctx.font = `400 10.6px ${serif}`; ctx.fillStyle = ink;
+      const words = text.split(' ');
+      let line = '', x = left + 14, maxW = right - x;
+      for (const w of words) {
+        const t = line ? line + ' ' + w : w;
+        if (ctx.measureText(t).width > maxW && line) {
+          put(line, x, y, 10.6); y += 19.5; line = w; x = left + 4; maxW = right - x;
+        } else line = t;
+      }
+      if (line) { put(line, x, y, 10.6); y += 19.5; }
+      y += 12;
+    }
+  }
+  ctx.font = `400 8.5px ${sans}`; ctx.fillStyle = '#9aa3b2';
+  ctx.fillText('예시 페이지 · 연습용으로 직접 쓴 문장', left, H - 40);
+  const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+  const page = { w: W, h: H, L };
+  const blanks = [];
+  for (const [needle, nth] of DEMO_BLANKS) {
+    let seen = 0;
+    for (let li = 0; li < L.length && blanks.length < DEMO_BLANKS.length; li++) {
+      const ch = Array.from(L[li][3]), n = Array.from(needle);
+      for (let s = 0; s + n.length <= ch.length; s++) {
+        if (ch.slice(s, s + n.length).join('') !== needle) continue;
+        if (seen++ === nth) blanks.push({ id: rid(), segs: [[li, s, s + n.length]], ans: needle, miss: 0, last: -1 });
+      }
+    }
+  }
+  return {
+    key: 'demo', name: '예시 페이지', demo: true, pages: [page], seed: { 0: blanks },
+    async draw(i, host) {
+      const url = URL.createObjectURL(blob), img = new Image();
+      img.alt = ''; img.className = 'pimg'; img.src = url;
+      Object.assign(img.style, { left: 0, top: 0, width: '100%', height: '100%' });
+      host.appendChild(img);
+      try { await img.decode(); } catch (e) { /* shown when ready */ }
+      return { main: img, mainRect: { l: 0, t: 0, w: 1, h: 1 }, release() { URL.revokeObjectURL(url); } };
+    },
+  };
+}
+const rid = () => Math.random().toString(36).slice(2, 10);
+
+/* ================= App state & page views ================= */
+const $ = id => document.getElementById(id);
+const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const S = {
+  book: null, views: [], blanks: new Map(), mode: 'edit', undo: [],
+  quiz: new Map(),        // blank id -> {st: 'open'|'ok'|'shown', val}
+  onlyWrong: false, sel: null, current: 0,
+};
+const blanksOf = p => S.blanks.get(p) || [];
+const orderBlanks = list => list.sort((a, b) => a.segs[0][0] - b.segs[0][0] || a.segs[0][1] - b.segs[0][1]);
+const isOpen = b => (S.quiz.get(b.id) || {}).st !== 'ok' && (S.quiz.get(b.id) || {}).st !== 'shown';
+const inQuiz = b => !S.onlyWrong || b.last === 0;
+
+function setBlanks(p, list, { undoable = true } = {}) {
+  if (undoable) {
+    S.undo.push({ p, list: blanksOf(p).map(b => ({ ...b, segs: b.segs.map(s => s.slice()) })) });
+    if (S.undo.length > 60) S.undo.shift();
+  }
+  orderBlanks(list);
+  if (list.length) S.blanks.set(p, list); else S.blanks.delete(p);
+  Store.save(p, list);
+  $('undoBtn').disabled = !S.undo.length || S.mode !== 'edit';
+  updateScore();
+}
+
+function undo() {
+  const u = S.undo.pop();
+  if (!u) return;
+  closePop();
+  setBlanks(u.p, u.list, { undoable: false });
+  const v = S.views[u.p];
+  if (v) { v.renderUI(); v.el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+}
+
+class PageView {
+  constructor(i) {
+    this.i = i;
+    const pg = S.book.pages[i];
+    this.el = mk('div', 'page');
+    this.el.dataset.i = i;
+    this.el.style.aspectRatio = `${pg.w} / ${pg.h}`;
+    this.art = mk('div', 'layer');
+    this.ui = mk('div', 'layer');
+    this.el.append(this.art, this.ui, mk('span', 'pno', S.book.demo ? '예시' : `p.${i + 1}`));
+    this.loaded = false; this.loading = null; this.handle = null; this.sample = null;
+    bindPageGestures(this);
+  }
+  load() {
+    if (this.loaded || this.loading) return this.loading;
+    const spin = mk('div', 'spin', '페이지 여는 중…');
+    this.art.appendChild(spin);
+    const host = mk('div', 'layer');
+    this.art.appendChild(host);
+    this.loading = S.book.draw(this.i, host).then(h => {
+      spin.remove();
+      this.handle = h; this.loaded = true; this.loading = null;
+      if (this.dropAfterLoad) { this.dropAfterLoad = false; this.unload(); return; }
+      this.renderUI();
+    }).catch(err => {
+      console.error(err);
+      this.loading = null;
+      spin.textContent = '이 페이지를 그리지 못했어요: ' + (err.message || err);
+    });
+    return this.loading;
+  }
+  unload() {
+    if (this.loading) { this.dropAfterLoad = true; return; }
+    if (!this.loaded) return;
+    if (this.ui.contains(document.activeElement)) return;
+    if (S.sel && S.sel.p === this.i) closePop();
+    this.handle.release();
+    this.art.replaceChildren(); this.ui.replaceChildren();
+    this.loaded = false; this.handle = null; this.sample = null;
+  }
+  /** Background color of the scan just outside a rectangle (page fractions). */
+  paperAround(r) {
+    const h = this.handle;
+    if (!h || !h.main || !h.mainRect) return null;
+    if (this.sample == null) {
+      try {
+        const img = h.main, cw = 400, ch = Math.max(1, Math.round(400 * img.naturalHeight / img.naturalWidth));
+        const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+        const ctx = cv.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0, cw, ch);
+        this.sample = { cw, ch, data: ctx.getImageData(0, 0, cw, ch).data };
+      } catch (e) { this.sample = false; }
+    }
+    if (!this.sample) return null;
+    const { cw, ch, data } = this.sample, m = h.mainRect, px = [];
+    const at = (fx, fy) => {
+      const x = Math.round((fx - m.l) / m.w * cw), y = Math.round((fy - m.t) / m.h * ch);
+      if (x < 0 || y < 0 || x >= cw || y >= ch) return;
+      const o = (y * cw + x) * 4; px.push([data[o], data[o + 1], data[o + 2]]);
+    };
+    for (let k = 0; k <= 12; k++) {
+      const fx = r.x + r.w * k / 12;
+      at(fx, r.y - .004); at(fx, r.y + r.h + .004);
+    }
+    for (let k = 0; k <= 4; k++) { const fy = r.y + r.h * k / 4; at(r.x - .006, fy); at(r.x + r.w + .006, fy); }
+    if (!px.length) return null;
+    px.sort((a, b) => (b[0] + b[1] + b[2]) - (a[0] + a[1] + a[2]));
+    const c = px[Math.floor(px.length * .25)];
+    return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+  }
+  renderUI() {
+    if (!this.loaded) return;
+    this.ui.replaceChildren();
+    if (S.mode === 'edit') renderEdit(this); else renderQuiz(this);
+  }
+}
+
+function buildViews() {
+  const stack = $('stack');
+  stack.replaceChildren();
+  if (window.__io) window.__io.disconnect();
+  S.views = S.book.pages.map((_, i) => new PageView(i));
+  const io = window.__io = new IntersectionObserver(entries => {
+    for (const en of entries) {
+      const v = S.views[+en.target.dataset.i];
+      if (en.isIntersecting) v.load(); else v.unload();
+    }
+  }, { rootMargin: '140% 0px 140% 0px' });
+  for (const v of S.views) { stack.appendChild(v.el); io.observe(v.el); }
+}
+
+function currentPage() {
+  const y = window.innerHeight * .4;
+  const el = document.elementFromPoint(window.innerWidth / 2, y);
+  const pageEl = el && el.closest && el.closest('.page');
+  if (pageEl) return +pageEl.dataset.i;
+  return S.current;
+}
+let scrollTick = 0;
+window.addEventListener('scroll', () => {
+  if (scrollTick) return;
+  scrollTick = requestAnimationFrame(() => {
+    scrollTick = 0;
+    if (!S.book) return;
+    const p = currentPage();
+    if (p !== S.current) {
+      S.current = p; updateIndicator(); updateScore();
+      if (!S.book.demo) ls.set('pos:' + S.book.key, p);
+    }
+  });
+}, { passive: true });
+
+function updateIndicator() {
+  if (!S.book) return;
+  $('pageInd').textContent = S.book.demo ? '체험용' : `${S.current + 1} / ${S.book.pages.length}쪽`;
+}
+
+function updateScore() {
+  const el = $('score');
+  if (!S.book) { el.textContent = ''; return; }
+  let total = 0, pages = 0;
+  for (const [, list] of S.blanks) { total += list.length; pages++; }
+  if (S.mode === 'edit') {
+    el.innerHTML = total ? `빈칸 <b>${total}</b>개 · ${pages}쪽` : '단어를 탭해 빈칸 만들기';
+    return;
+  }
+  const here = blanksOf(S.current).filter(inQuiz);
+  const ok = here.filter(b => (S.quiz.get(b.id) || {}).st === 'ok').length;
+  el.innerHTML = here.length ? `이 쪽 <b>${ok}</b> / ${here.length}` : '이 쪽엔 빈칸이 없어요';
+}
+
+function goToPage(p, focusFirst) {
+  const v = S.views[Math.max(0, Math.min(S.views.length - 1, p))];
+  if (!v) return;
+  v.el.scrollIntoView({ block: 'start' });
+  window.scrollBy(0, -64);
+  S.current = v.i; updateIndicator(); updateScore();
+  if (focusFirst && S.mode === 'quiz') v.load().then(() => focusNext(v.i, -1));
+}
+
+function setMode(m) {
+  S.mode = m;
+  closePop();
+  $('modeEdit').setAttribute('aria-pressed', m === 'edit');
+  $('modeQuiz').setAttribute('aria-pressed', m === 'quiz');
+  $('undoBtn').disabled = m !== 'edit' || !S.undo.length;
+  for (const v of S.views) v.renderUI();
+  updateScore();
+}
+
+/* ================= 만들기: tap a word, long-press or pencil-drag a range ================= */
+const place = (el, r) => Object.assign(el.style, { left: r.x * 100 + '%', top: r.y * 100 + '%', width: r.w * 100 + '%', height: r.h * 100 + '%' });
+const pageFrac = (v, e) => { const r = v.el.getBoundingClientRect(); return { fx: (e.clientX - r.left) / r.width, fy: (e.clientY - r.top) / r.height }; };
+const cloneList = p => blanksOf(p).map(b => ({ ...b, segs: b.segs.map(s => s.slice()) }));
+const overlap = (a, b) => a.some(([l1, s1, e1]) => b.some(([l2, s2, e2]) => l1 === l2 && s1 < e2 && s2 < e1));
+
+function renderEdit(v) {
+  const pg = S.book.pages[v.i];
+  for (const b of blanksOf(v.i)) {
+    for (const r of segRects(pg, b.segs)) {
+      const d = mk('div', 'hl' + (S.sel && S.sel.id === b.id ? ' sel' : ''));
+      place(d, r);
+      v.ui.appendChild(d);
+    }
+  }
+  if (S.sel && S.sel.p === v.i) buildPop(v);
+}
+
+function blankAt(p, fx, fy) {
+  const pg = S.book.pages[p];
+  for (const b of blanksOf(p)) for (const r of segRects(pg, b.segs)) if (fx >= r.x && fx <= r.x + r.w && fy >= r.y && fy <= r.y + r.h) return b;
+  return null;
+}
+
+function bindPageGestures(v) {
+  const el = v.el;
+  let g = null;
+  const pg = () => S.book.pages[v.i];
+  const drawDrag = segs => {
+    v.ui.querySelectorAll('.drag').forEach(n => n.remove());
+    for (const r of segRects(pg(), segs)) { const d = mk('div', 'drag'); place(d, r); v.ui.appendChild(d); }
+  };
+  const begin = () => {
+    if (!g) return;
+    const h = hitChar(pg(), g.f.fx, g.f.fy);
+    if (!h) { g = null; return; }
+    g.sel = true; g.start = h; g.segs = rangeSegs(pg(), h, h);
+    if (S.sel) closePop();
+    drawDrag(g.segs);
+  };
+  el.addEventListener('pointerdown', e => {
+    if (S.mode !== 'edit' || !v.loaded || e.button > 0 || e.target.closest('.pop')) return;
+    g = { id: e.pointerId, type: e.pointerType, x: e.clientX, y: e.clientY, f: pageFrac(v, e), sel: false, timer: 0 };
+    if (e.pointerType === 'touch') g.timer = setTimeout(begin, 380);
+  });
+  el.addEventListener('pointermove', e => {
+    if (!g || e.pointerId !== g.id) return;
+    if (!g.sel) {
+      if (Math.hypot(e.clientX - g.x, e.clientY - g.y) < 8) return;
+      if (g.type === 'touch') { clearTimeout(g.timer); g = null; return; }
+      begin();
+      if (!g) return;
+    }
+    const f = pageFrac(v, e), h = hitChar(pg(), f.fx, f.fy);
+    if (h) { g.segs = rangeSegs(pg(), g.start, h); drawDrag(g.segs); }
+  });
+  const end = e => {
+    if (!g || e.pointerId !== g.id) return;
+    clearTimeout(g.timer);
+    const done = g; g = null;
+    v.ui.querySelectorAll('.drag').forEach(n => n.remove());
+    if (e.type === 'pointercancel') return;
+    if (done.sel) { if (done.segs && done.segs.length) addBlank(v, done.segs); }
+    else tapPage(v, done.f);
+  };
+  el.addEventListener('pointerup', end);
+  el.addEventListener('pointercancel', end);
+  // keep the page still while a long-press selection or an Apple Pencil stroke is running
+  el.addEventListener('touchmove', e => {
+    if (S.mode !== 'edit') return;
+    if ((g && g.sel) || Array.from(e.touches).some(t => t.touchType === 'stylus')) e.preventDefault();
+  }, { passive: false });
+}
+
+function tapPage(v, f) {
+  const hit = blankAt(v.i, f.fx, f.fy);
+  if (hit) { openPop(v.i, hit.id); return; }
+  const pg = S.book.pages[v.i], h = hitChar(pg, f.fx, f.fy);
+  const w = h && wordAt(pg, h.li, h.ci);
+  if (!w) { closePop(); return; }
+  addBlank(v, [[h.li, w[0], w[1]]]);
+}
+
+function addBlank(v, segs) {
+  const pg = S.book.pages[v.i];
+  const list = cloneList(v.i).filter(b => !overlap(b.segs, segs));
+  const b = { id: rid(), segs, ans: segText(pg, segs), miss: 0, last: -1 };
+  list.push(b);
+  setBlanks(v.i, list);
+  const prev = S.sel && S.sel.p !== v.i ? S.views[S.sel.p] : null;
+  S.sel = { p: v.i, id: b.id };
+  if (prev) prev.renderUI();
+  v.renderUI();
+}
+
+function updateBlank(v, id, patch) {
+  const pg = S.book.pages[v.i], list = cloneList(v.i), b = list.find(x => x.id === id);
+  if (!b) return;
+  Object.assign(b, patch);
+  if (patch.segs && !b.custom) b.ans = segText(pg, b.segs);
+  setBlanks(v.i, list);
+  v.renderUI();
+}
+
+function deleteBlank(v, id) {
+  setBlanks(v.i, cloneList(v.i).filter(b => b.id !== id));
+  S.sel = null;
+  v.renderUI();
+}
+
+function openPop(p, id) {
+  const prev = S.sel && S.sel.p !== p ? S.views[S.sel.p] : null;
+  S.sel = { p, id };
+  if (prev) prev.renderUI();
+  S.views[p].renderUI();
+}
+function closePop() {
+  if (!S.sel) return;
+  const v = S.views[S.sel.p];
+  S.sel = null;
+  if (v && S.mode === 'edit') v.renderUI();
+}
+
+/** Characters of the blank plus the rest of the words it touches, as tappable chips. */
+function chipModel(pg, segs) {
+  const flat = [], last = segs.length - 1;
+  segs.forEach(([li, s, e], k) => {
+    const L = lineInfo(pg, li);
+    let a = s, z = e;
+    if (k === 0) while (a > 0 && !isSpace(L.ch[a - 1])) a--;
+    if (k === last) while (z < L.ch.length && !isSpace(L.ch[z])) z++;
+    if (k) flat.push({ sep: true });
+    for (let c = a; c < z; c++) flat.push({ li, ci: c, ch: L.ch[c], on: c >= s && c < e });
+  });
+  return flat;
+}
+
+function chipTap(v, id, flat, k) {
+  const on = flat.map((c, i) => (c.on ? i : -1)).filter(i => i >= 0);
+  let s = on[0], e = on[on.length - 1];
+  const skip = i => flat[i].sep || isSpace(flat[i].ch);
+  if (k < s) s = k;
+  else if (k > e) e = k;
+  else if (k === s && s < e) { s++; while (s < e && skip(s)) s++; }
+  else if (k === e && s < e) { e--; while (e > s && skip(e)) e--; }
+  else if (k > s && k < e) e = k;
+  else return;
+  const segs = [];
+  for (let i = s; i <= e; i++) {
+    const c = flat[i];
+    if (c.sep) continue;
+    const t = segs[segs.length - 1];
+    if (t && t[0] === c.li) t[2] = c.ci + 1; else segs.push([c.li, c.ci, c.ci + 1]);
+  }
+  const trimmed = trimSegs(S.book.pages[v.i], segs);
+  if (trimmed.length) updateBlank(v, id, { segs: trimmed });
+}
+
+function buildPop(v) {
+  const b = blanksOf(v.i).find(x => x.id === S.sel.id);
+  if (!b) { S.sel = null; return; }
+  const pg = S.book.pages[v.i], rects = segRects(pg, b.segs);
+  const pop = mk('div', 'pop');
+  pop.setAttribute('role', 'dialog');
+  pop.setAttribute('aria-label', '빈칸 편집');
+  ['pointerdown', 'pointerup'].forEach(t => pop.addEventListener(t, e => e.stopPropagation()));
+
+  const lab = mk('label', null, '정답');
+  lab.htmlFor = 'popAns';
+  const ans = mk('input', 'ans');
+  Object.assign(ans, { id: 'popAns', value: b.ans, autocomplete: 'off', spellcheck: false });
+  ans.setAttribute('autocapitalize', 'off');
+  ans.setAttribute('autocorrect', 'off');
+  ans.addEventListener('change', () => {
+    const val = ans.value.trim();
+    updateBlank(v, b.id, val ? { ans: val, custom: true } : { ans: segText(pg, b.segs), custom: false });
+  });
+  ans.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) ans.blur(); });
+
+  const chips = mk('div', 'chips');
+  const flat = chipModel(pg, b.segs);
+  flat.forEach((c, k) => {
+    if (c.sep) { chips.appendChild(mk('span', 'hint', '↵')); return; }
+    if (isSpace(c.ch)) { chips.appendChild(mk('span', null, ' ')); return; }
+    const btn = mk('button', c.on ? 'on' : '', c.ch);
+    btn.type = 'button';
+    btn.setAttribute('aria-pressed', c.on);
+    btn.addEventListener('click', () => chipTap(v, b.id, flat, k));
+    chips.appendChild(btn);
+  });
+
+  const row = mk('div', 'row');
+  const mkBtn = (label, cls, fn) => { const x = mk('button', 'btn ' + cls, label); x.type = 'button'; x.addEventListener('click', fn); row.appendChild(x); return x; };
+  mkBtn('◀ 앞 단어', '', () => updateBlank(v, b.id, { segs: extendSegs(pg, b.segs, -1) }));
+  mkBtn('뒤 단어 ▶', '', () => updateBlank(v, b.id, { segs: extendSegs(pg, b.segs, 1) }));
+  mkBtn('삭제', 'danger', () => deleteBlank(v, b.id));
+  mkBtn('완료', 'primary grow', () => closePop());
+
+  const tip = mk('p', 'hint', '글자를 눌러 빈칸 범위를 줄이거나 늘려요. 답이 여러 개면 | 로 구분해요 (예: 소의 취하|취하).');
+  pop.append(lab, ans, chips, row, tip);
+
+  const pw = v.el.clientWidth, ph = v.el.clientHeight;
+  const popW = Math.min(340, pw - 16), first = rects[0], lastR = rects[rects.length - 1];
+  pop.style.left = Math.max(8, Math.min(pw - popW - 8, first.x * pw)) + 'px';
+  if ((lastR.y + lastR.h) * ph + 250 < ph) pop.style.top = ((lastR.y + lastR.h) * ph + 8) + 'px';
+  else pop.style.bottom = (ph - first.y * ph + 8) + 'px';
+  v.ui.appendChild(pop);
+}
+
+/* ================= 풀기: type into the blank, Enter to check ================= */
+const norm = s => String(s || '').normalize('NFC').toLowerCase().replace(/[\s·•ㆍ∙.,:;!?'"“”‘’()[\]{}<>「」『』《》〈〉\-–—~…]/g, '');
+const isRight = (val, ans) => { const v = norm(val); return !!v && String(ans).split('|').some(a => norm(a) === v); };
+const CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+const chosung = s => Array.from(s).map(c => { const k = c.charCodeAt(0) - 0xAC00; return k >= 0 && k < 11172 ? CHO[Math.floor(k / 588)] : c; }).join('');
+const qstate = id => { if (!S.quiz.has(id)) S.quiz.set(id, { st: 'open', val: '', wrong: false }); return S.quiz.get(id); };
+const coverInput = (v, id) => v && v.ui.querySelector(`.cover input[data-id="${id}"]`);
+
+function renderQuiz(v) {
+  const pg = S.book.pages[v.i], ph = v.el.clientHeight;
+  blanksOf(v.i).forEach((b, n) => {
+    if (!inQuiz(b)) return;
+    const q = qstate(b.id), rects = segRects(pg, b.segs);
+    if (q.st !== 'open') { addTicks(v, rects, q.st); return; }
+    rects.forEach((r, k) => {
+      const c = mk('div', 'cover' + (k ? ' cont' : ''));
+      place(c, r);
+      c.dataset.id = b.id;
+      const bg = v.paperAround(r);
+      if (bg) c.style.background = bg;
+      if (k === 0) {
+        const inp = mk('input');
+        Object.assign(inp, { type: 'text', value: q.val || '', autocomplete: 'off', spellcheck: false, enterKeyHint: 'next' });
+        inp.setAttribute('autocapitalize', 'off');
+        inp.setAttribute('autocorrect', 'off');
+        inp.setAttribute('aria-label', `${v.i + 1}쪽 ${n + 1}번째 빈칸`);
+        inp.dataset.id = b.id;
+        const k2 = Math.max(.5, Math.min(1.5, r.h * ph * .5 / 16));
+        inp.style.transform = `scale(${k2})`;
+        inp.style.width = 100 / k2 + '%';
+        bindAnswer(v, b.id, inp, c);
+        c.appendChild(inp);
+      } else {
+        c.addEventListener('click', () => { const inp = coverInput(v, b.id); if (inp) inp.focus(); });
+      }
+      v.ui.appendChild(c);
+    });
+  });
+}
+
+function addTicks(v, rects, st) {
+  rects.forEach((r, k) => {
+    const t = mk('div', 'tick' + (st === 'shown' ? ' shown' : '') + (k === rects.length - 1 ? ' end' : ''));
+    place(t, { x: r.x, y: r.y, w: r.w, h: r.h * .92 });
+    v.ui.appendChild(t);
+  });
+}
+
+function bindAnswer(v, id, inp, cover) {
+  let composing = false, pending = false, last = 0;
+  const submit = () => {
+    const now = Date.now();
+    if (now - last < 250) return;
+    last = now;
+    checkAnswer(v, id, inp, cover);
+  };
+  inp.addEventListener('compositionstart', () => { composing = true; });
+  inp.addEventListener('compositionend', () => { composing = false; if (pending) { pending = false; setTimeout(submit, 0); } });
+  inp.addEventListener('input', () => { qstate(id).val = inp.value; cover.classList.remove('wrong'); });
+  inp.addEventListener('focus', () => {
+    cover.classList.add('active');
+    if (S.current !== v.i) { S.current = v.i; updateIndicator(); updateScore(); }
+    showAssist(v, id, cover);
+  });
+  inp.addEventListener('blur', () => { cover.classList.remove('active'); hideAssistSoon(); });
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (e.isComposing || composing) { pending = true; return; }
+      submit();
+    } else if (e.key === 'Escape') inp.blur();
+  });
+}
+
+function recordResult(p, id, ok) {
+  const list = cloneList(p), b = list.find(x => x.id === id), q = qstate(id);
+  if (!b) return;
+  if (ok) b.last = q.wrong ? 0 : 1;
+  else { b.miss = (b.miss || 0) + 1; b.last = 0; q.wrong = true; }
+  setBlanks(p, list, { undoable: false });
+}
+
+function checkAnswer(v, id, inp, cover) {
+  const b = blanksOf(v.i).find(x => x.id === id);
+  if (!b) return;
+  const q = qstate(id);
+  q.val = inp.value;
+  if (!norm(inp.value)) { focusNext(v.i, id); return; }
+  if (isRight(inp.value, b.ans)) {
+    q.st = 'ok';
+    recordResult(v.i, id, true);
+    finishBlank(v, id, 'ok');
+    focusNext(v.i, id);
+  } else {
+    recordResult(v.i, id, false);
+    cover.classList.remove('wrong');
+    void cover.offsetWidth;
+    cover.classList.add('wrong');
+    inp.select();
+  }
+  updateScore();
+}
+
+function revealAnswer(v, id) {
+  const q = qstate(id);
+  if (q.st !== 'open') return;
+  if (!q.wrong) recordResult(v.i, id, false);
+  q.st = 'shown';
+  finishBlank(v, id, 'shown');
+  updateScore();
+  focusNext(v.i, id);
+}
+
+function finishBlank(v, id, st) {
+  const b = blanksOf(v.i).find(x => x.id === id);
+  v.ui.querySelectorAll(`.cover[data-id="${id}"]`).forEach(c => {
+    c.classList.add('done');
+    const inp = c.querySelector('input');
+    if (inp) inp.disabled = true;
+    setTimeout(() => c.remove(), 420);
+  });
+  if (b) addTicks(v, segRects(S.book.pages[v.i], b.segs), st);
+}
+
+function nextQuizPage(p) {
+  const pages = [...S.blanks.keys()].sort((a, b) => a - b);
+  for (const q of pages) if (q > p && blanksOf(q).some(b => inQuiz(b) && isOpen(b))) return q;
+  for (const q of pages) if (q <= p && blanksOf(q).some(b => inQuiz(b) && isOpen(b))) return q;
+  return null;
+}
+
+function focusNext(p, afterId) {
+  const list = blanksOf(p), at = afterId ? list.findIndex(b => b.id === afterId) : -1;
+  const ok = b => inQuiz(b) && isOpen(b) && b.id !== afterId;
+  const nb = list.slice(at + 1).find(ok) || list.slice(0, Math.max(0, at)).find(ok);
+  const inp = nb && coverInput(S.views[p], nb.id);
+  if (inp) {
+    inp.focus({ preventScroll: true });
+    inp.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    return;
+  }
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  const np = nextQuizPage(p);
+  if (np == null || np === p) toast(S.onlyWrong ? '틀렸던 빈칸을 모두 다시 풀었어요.' : '빈칸을 모두 풀었어요.', '다시 풀기', () => resetQuiz(null));
+  else toast(`이 쪽 끝. 다음 빈칸은 ${np + 1}쪽에 있어요.`, `${np + 1}쪽으로`, () => goToPage(np, true));
+}
+
+function resetQuiz(p) {
+  if (p == null) S.quiz.clear(); else for (const b of blanksOf(p)) S.quiz.delete(b.id);
+  for (const v of S.views) if (p == null || v.i === p) v.renderUI();
+  updateScore();
+}
+
+let assistTimer = 0;
+function showAssist(v, id, cover) {
+  clearTimeout(assistTimer);
+  const b = blanksOf(v.i).find(x => x.id === id);
+  if (!b) return;
+  const a = S.assist || (S.assist = mk('div', 'assist'));
+  a.replaceChildren();
+  const add = (label, fn) => {
+    const x = mk('button', null, label);
+    x.type = 'button';
+    x.addEventListener('pointerdown', e => e.preventDefault());
+    x.addEventListener('mousedown', e => e.preventDefault());
+    x.addEventListener('click', fn);
+    a.appendChild(x);
+  };
+  add('초성 힌트', () => { const inp = coverInput(v, id); if (inp) { inp.placeholder = chosung(b.ans.split('|')[0]); inp.focus(); } });
+  add('정답 보기', () => revealAnswer(v, id));
+  add('건너뛰기', () => focusNext(v.i, id));
+  const top = parseFloat(cover.style.top), h = parseFloat(cover.style.height);
+  a.style.left = `min(${cover.style.left}, calc(100% - 250px))`;
+  if (top > 88) { a.style.top = ''; a.style.bottom = `calc(${100 - top}% + 6px)`; }
+  else { a.style.bottom = ''; a.style.top = `calc(${top + h}% + 6px)`; }
+  v.ui.appendChild(a);
+}
+function hideAssistSoon() {
+  clearTimeout(assistTimer);
+  assistTimer = setTimeout(() => {
+    const f = document.activeElement;
+    if (!(f && f.closest && f.closest('.cover')) && S.assist) S.assist.remove();
+  }, 180);
+}
+
+/* ================= Opening books, sheets, startup ================= */
+const fmtSize = n => n > 1 << 20 ? (n / (1 << 20)).toFixed(0) + 'MB' : Math.max(1, Math.round(n / 1024)) + 'KB';
+const pend = { pdf: null, ocr: null };
+
+function setNotice(html, withButton) {
+  $('notice').hidden = !html;
+  if (html) $('noticeText').innerHTML = html;
+  $('openFiles').hidden = !withButton;
+}
+
+async function installBook(book) {
+  closeSheet();
+  S.book = book; S.undo = []; S.quiz = new Map(); S.sel = null; S.current = 0;
+  const apply = data => {
+    S.blanks = new Map();
+    for (const [p, list] of Object.entries(data || {})) {
+      if (Array.isArray(list) && list.length && book.pages[+p]) S.blanks.set(+p, orderBlanks(list.map(b => ({ ...b, segs: b.segs.map(s => s.slice()) }))));
+    }
+  };
+  apply(Store.loadLocal(book.key));
+  if (book.seed && !S.blanks.size) for (const [p, list] of Object.entries(book.seed)) { S.blanks.set(+p, list); Store.save(+p, list); }
+  $('bookName').textContent = book.name;
+  $('undoBtn').disabled = true;
+  buildViews(); updateIndicator(); updateScore();
+  if (!book.demo && !window.claude && navigator.storage && navigator.storage.persist) {
+    // ask the browser not to clear this page's storage on its own
+    navigator.storage.persist().catch(() => {});
+  }
+  if (!book.demo) {
+    Store.loadRemote().then(data => {
+      if (S.book !== book || !data) return;
+      apply(data);
+      for (const v of S.views) v.renderUI();
+      updateScore();
+    });
+  }
+}
+
+/** Opens the book; without `ocrText` the word positions must be inside the PDF. Resolves the OCR text used. */
+async function openBook(pdfFile, ocrText) {
+  let pdf;
+  try { pdf = await new PdfDoc(pdfFile).open(); }
+  catch (e) { throw new Error(e instanceof PdfError ? e.message : 'PDF를 읽지 못했어요: ' + (e.message || e)); }
+  if (ocrText == null) {
+    const bytes = await pdf.embedded(/ocr\.json$/i).catch(() => null);
+    if (!bytes) {
+      const err = new Error('이 PDF에는 단어 위치 정보가 없어요. ② 단어 위치 파일도 골라 주세요.');
+      err.code = 'NEED_OCR';
+      throw err;
+    }
+    ocrText = new TextDecoder().decode(bytes);
+  }
+  let ocr;
+  try { ocr = JSON.parse(ocrText); } catch (e) { throw new Error('단어 위치 파일을 읽지 못했어요. 맥에서 만든 _OCR.json 파일이 맞는지 확인해 주세요.'); }
+  if (!ocr || !Array.isArray(ocr.pages)) throw new Error('단어 위치 파일의 형식이 달라요.');
+  if (pdf.pages.length !== ocr.pages.length) throw new Error(`두 파일의 쪽수가 달라요 (PDF ${pdf.pages.length}쪽, 단어 위치 파일 ${ocr.pages.length}쪽). 같은 책의 파일인지 확인해 주세요.`);
+  const hexId = String(ocr.id || '').replace(/[^0-9a-f]/gi, '').slice(0, 16);
+  const book = {
+    key: hexId ? 'b' + hexId : 'n' + ocr.pages.length,
+    name: String(ocr.name || pdfFile.name || '내 책').replace(/\.pdf$/i, ''),
+    pages: ocr.pages, pdf,
+    draw: (i, host) => drawPdfPage(pdf, i, host),
+  };
+  setNotice('', false);
+  await installBook(book);
+  const pos = ls.get('pos:' + book.key);
+  if (typeof pos === 'number' && pos > 0) goToPage(pos);
+  return ocrText;
+}
+
+const DEMO_NOTICE = '<b>예시 페이지예요.</b> 만들기에서 단어를 탭하면 빈칸이 생기고, 풀기에서 키보드로 답을 입력해요. <b>PDF 열기</b>를 눌러 내 PDF를 고르면 책 전체로 바뀌어요.';
+async function openDemo() {
+  const book = S.demoBook || (S.demoBook = await buildDemoBook());
+  await installBook(book);
+  setNotice(DEMO_NOTICE, true);
+}
+
+/** Open, then remember the files on this device so the next visit opens straight away. */
+async function openAndRemember(pdfFile, ocrText, remember) {
+  const text = await openBook(pdfFile, ocrText);
+  closeSheet();
+  if (remember) {
+    FileCache.put('ocr', text).then(ok => ok && FileCache.put('pdf', pdfFile)).then(ok => {
+      toast(ok ? '책을 열었어요. 다음부터는 이 페이지만 열면 바로 열려요.' : '이 기기에 PDF를 저장하지 못했어요. 다음에도 PDF를 골라 주세요.');
+    });
+  } else { FileCache.del('pdf'); FileCache.del('ocr'); }
+}
+
+/** The one-tap path: whatever the picker returns (one PDF, or a PDF and its word file). */
+async function quickOpen(files) {
+  const pdf = files.find(f => /\.pdf$/i.test(f.name) || f.type === 'application/pdf');
+  const json = files.find(f => /\.json$/i.test(f.name));
+  if (json) pend.ocr = json;
+  if (!pdf) { filesSheet(json ? 'PDF도 골라 주세요.' : 'PDF 파일을 골라 주세요.'); return; }
+  pend.pdf = pdf;
+  const restore = S.book && S.book.demo ? DEMO_NOTICE : '';
+  setNotice('<b>책을 여는 중…</b> 처음엔 몇 초 걸려요.', false);
+  try {
+    await openAndRemember(pdf, json ? await json.text() : null, ls.get('remember') !== false);
+  } catch (e) {
+    console.warn(e);
+    setNotice(restore, !!restore);
+    filesSheet(e.message || String(e));
+  }
+}
+
+function openSheet(build) {
+  closeSheet();
+  const bg = mk('div', 'sheet-bg');
+  bg.id = 'sheetBg';
+  bg.addEventListener('click', closeSheet);
+  const sh = mk('div', 'sheet');
+  sh.id = 'sheet';
+  sh.setAttribute('role', 'dialog');
+  sh.setAttribute('aria-modal', 'true');
+  const x = mk('button', 'icon x');
+  x.type = 'button';
+  x.setAttribute('aria-label', '닫기');
+  x.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+  x.addEventListener('click', closeSheet);
+  sh.appendChild(x);
+  build(sh);
+  document.body.append(bg, sh);
+}
+function closeSheet() { const a = $('sheetBg'), b = $('sheet'); if (a) a.remove(); if (b) b.remove(); }
+
+function filesSheet(err) {
+  openSheet(sh => {
+    sh.append(mk('h2', null, '내 책 열기'),
+      mk('p', 'hint', 'PDF를 골라 주세요. 단어 위치 정보가 들어 있지 않은 PDF라면 단어 위치 파일도 함께 골라요. 파일은 이 기기 안에서만 읽고 어디에도 올리지 않아요.'));
+    const slot = (title, file, desc, inputId) => {
+      const s = mk('div', 'slot' + (file ? ' ok' : ''));
+      const btn = mk('button', 'btn', file ? '바꾸기' : '고르기');
+      btn.type = 'button';
+      btn.addEventListener('click', () => $(inputId).click());
+      s.append(mk('b', null, title), btn, mk('small', null, file ? `${file.name} · ${fmtSize(file.size)}` : desc));
+      return s;
+    };
+    sh.append(slot('① PDF', pend.pdf, '예: 윤곽기본서_빈칸용.pdf', 'pdfInput'),
+      slot('② 단어 위치 파일 (필요할 때만)', pend.ocr, '단어 위치 정보가 든 PDF면 고르지 않아도 돼요. 예: 윤곽기본서_OCR.json', 'ocrInput'));
+    const lab = mk('label', 'check'), cb = mk('input');
+    cb.type = 'checkbox'; cb.id = 'rememberCb'; cb.checked = ls.get('remember') !== false;
+    cb.addEventListener('change', () => ls.set('remember', cb.checked));
+    lab.append(cb, mk('span', null, '이 기기에 기억하기. 다음부터 파일을 고르지 않아도 바로 열려요 (PDF 크기만큼 저장 공간을 써요).'));
+    sh.append(lab);
+    if (err) sh.append(mk('p', 'err', err));
+    const row = mk('div', 'row');
+    const demo = mk('button', 'btn quiet', '예시 페이지 보기');
+    demo.type = 'button';
+    demo.addEventListener('click', () => { closeSheet(); openDemo(); });
+    const go = mk('button', 'btn primary', '열기');
+    go.type = 'button';
+    go.disabled = !pend.pdf;
+    go.addEventListener('click', () => doOpen(cb.checked, go));
+    row.append(demo, go);
+    sh.append(row);
+  });
+}
+
+async function doOpen(remember, btn) {
+  btn.disabled = true;
+  btn.textContent = 'PDF 읽는 중…';
+  try {
+    await openAndRemember(pend.pdf, pend.ocr ? await pend.ocr.text() : null, remember);
+  } catch (e) {
+    console.error(e);
+    filesSheet(e.message || String(e));
+  }
+}
+
+const statusText = () => (S.book && S.book.demo ? '예시 페이지의 빈칸은 이 브라우저에만 저장돼요.' : ({
+  synced: '빈칸은 Claude 계정에 저장돼요. 맥과 아이패드 어디서 열어도 같아요.',
+  saving: '저장하는 중…',
+  error: '계정에 저장하지 못했어요. 이 기기에는 저장돼 있어요.',
+  full: '저장 공간이 가득 찼어요. 쓰지 않는 빈칸을 지워 주세요.',
+  local: '빈칸은 이 기기 브라우저에만 저장돼요.',
+})[Store.status] || '');
+
+function listSheet() {
+  openSheet(sh => {
+    const n = S.book.pages.length;
+    sh.append(mk('h2', null, S.book.name));
+    if (!S.book.demo) {
+      const f = mk('form', 'jump'), inp = mk('input'), go = mk('button', 'btn primary', '이동');
+      Object.assign(inp, { type: 'number', min: 1, max: n, id: 'jumpInput', placeholder: `쪽 번호 (1–${n})` });
+      inp.inputMode = 'numeric';
+      go.type = 'submit';
+      f.append(inp, go);
+      f.addEventListener('submit', e => { e.preventDefault(); const k = parseInt(inp.value, 10); if (k >= 1 && k <= n) { closeSheet(); goToPage(k - 1); } });
+      sh.append(f);
+    }
+    const lab = mk('label', 'check'), cb = mk('input');
+    cb.type = 'checkbox'; cb.id = 'onlyWrongCb'; cb.checked = S.onlyWrong;
+    cb.addEventListener('change', () => { S.onlyWrong = cb.checked; for (const v of S.views) v.renderUI(); updateScore(); });
+    lab.append(cb, mk('span', null, '틀렸던 빈칸만 풀기'));
+    const row = mk('div', 'row');
+    const again = (label, p) => { const b = mk('button', 'btn', label); b.type = 'button'; b.addEventListener('click', () => { closeSheet(); setMode('quiz'); resetQuiz(p); }); row.appendChild(b); };
+    again('이 쪽 다시 풀기', S.current);
+    again('전부 다시 풀기', null);
+    sh.append(mk('h3', null, '풀기'), lab, row, mk('h3', null, '빈칸이 있는 쪽'));
+    const pages = [...S.blanks.keys()].sort((a, b) => a - b);
+    if (!pages.length) sh.append(mk('p', 'hint', '아직 빈칸이 없어요. 만들기에서 단어를 탭해 보세요.'));
+    else {
+      const ul = mk('ul', 'plist');
+      for (const p of pages) {
+        const list = blanksOf(p), wrong = list.filter(b => b.last === 0).length;
+        const li = mk('li'), b = mk('button');
+        b.type = 'button';
+        b.append(mk('span', 'pg', S.book.demo ? '예시' : `${p + 1}쪽`), mk('span', 'meta', list.map(x => x.ans).join(' · ')),
+          mk('span', 'st', `빈칸 ${list.length}` + (wrong ? ` · 틀림 ${wrong}` : '')));
+        b.addEventListener('click', () => { closeSheet(); goToPage(p); });
+        li.appendChild(b); ul.appendChild(li);
+      }
+      sh.append(ul);
+    }
+    sh.append(mk('p', 'hint', statusText()));
+    if (!Store.db && !S.book.demo) {
+      const last = ls.get('backupAt:' + S.book.key);
+      sh.append(mk('h3', null, '백업'),
+        mk('p', 'hint', '이 기기 브라우저에만 저장되니, 가끔 백업 파일을 만들어 파일 앱에 저장해 두세요.' + (last ? ` 마지막 백업: ${fmtDate(last)}.` : ' 아직 백업한 적이 없어요.')));
+      const row2 = mk('div', 'row');
+      const ex = mk('button', 'btn', '백업 파일 만들기'), im = mk('button', 'btn', '백업 불러오기');
+      ex.type = im.type = 'button';
+      ex.addEventListener('click', exportBlanks);
+      im.addEventListener('click', () => $('backupInput').click());
+      row2.append(im, ex);
+      sh.append(row2);
+    }
+  });
+}
+
+/* ================= Backup files (when blanks live only in this browser) ================= */
+const fmtDate = t => new Date(t).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+const countBlanks = map => Object.values(map).reduce((n, l) => n + (Array.isArray(l) ? l.length : 0), 0);
+
+function makeBackup() {
+  const blanks = {};
+  for (const [p, list] of S.blanks) blanks[p] = list;
+  const d = new Date(), pad = n => String(n).padStart(2, '0');
+  return {
+    name: `${S.book.name}_빈칸백업_${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`,
+    text: JSON.stringify({ app: 'yungwak-blanks', v: 1, key: S.book.key, book: S.book.name, savedAt: d.toISOString(), blanks }),
+    count: countBlanks(blanks),
+  };
+}
+
+/* Inside Claude a page can only hand over a file through the downloads capability. */
+const Dl = {
+  p: null,
+  get() {
+    if (!this.p) this.p = window.claude && typeof window.claude.use === 'function' ? window.claude.use('downloads').catch(() => null) : Promise.resolve(null);
+    return this.p;
+  },
+};
+
+async function exportBlanks() {
+  const b = makeBackup();
+  try {
+    if (window.claude) {
+      const dl = await Dl.get();
+      if (!dl) { toast('이 화면에서는 파일을 저장할 수 없어요.'); return; }
+      await dl.save({ filename: b.name, data: b.text });
+    } else if (navigator.maxTouchPoints > 1 && navigator.canShare && navigator.canShare({ files: [new File([b.text], b.name, { type: 'application/json' })] })) {
+      await navigator.share({ files: [new File([b.text], b.name, { type: 'application/json' })] });
+    } else {
+      const file = new File([b.text], b.name, { type: 'application/json' });
+      const url = URL.createObjectURL(file), a = mk('a');
+      a.href = url; a.download = b.name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    }
+    ls.set('backupAt:' + S.book.key, Date.now());
+    closeSheet();
+    toast(`빈칸 ${b.count}개를 백업 파일로 만들었어요.`);
+  } catch (e) {
+    if (e && (e.name === 'AbortError' || e.code === 'declined')) return;
+    toast(e && e.code === 'rate_limited' ? '저장 확인 창이 이미 떠 있어요. 잠시 뒤 다시 눌러 주세요.' : '백업 파일을 만들지 못했어요.');
+  }
+}
+
+/** Parse a backup file and keep only blanks that fit this book's pages. */
+function readBackup(text) {
+  let data;
+  try { data = JSON.parse(text); } catch (e) { data = null; }
+  if (!data || data.app !== 'yungwak-blanks' || !data.blanks || typeof data.blanks !== 'object') throw new Error('빈칸 백업 파일이 아니에요.');
+  if (data.key !== S.book.key) throw new Error(`다른 책의 백업이에요${data.book ? ` (${data.book})` : ''}. 같은 책을 연 상태에서 불러와 주세요.`);
+  const clean = {};
+  for (const [p, list] of Object.entries(data.blanks)) {
+    const pg = S.book.pages[+p];
+    if (!pg || !Array.isArray(list)) continue;
+    const ok = list.filter(b => b && typeof b.id === 'string' && typeof b.ans === 'string' && Array.isArray(b.segs) && b.segs.length &&
+      b.segs.every(s => Array.isArray(s) && s.length === 3 && s.every(Number.isInteger) && s[0] >= 0 && s[0] < pg.L.length && s[1] >= 0 && s[1] < s[2] && s[2] <= lineInfo(pg, s[0]).ch.length));
+    if (ok.length) clean[+p] = ok.map(b => ({ id: b.id, segs: b.segs.map(s => s.slice()), ans: b.ans, miss: b.miss | 0, last: b.last === 0 || b.last === 1 ? b.last : -1, ...(b.custom ? { custom: true } : {}) }));
+  }
+  return { blanks: clean, savedAt: data.savedAt, count: countBlanks(clean) };
+}
+
+function applyBackup(data) {
+  const old = [...S.blanks.keys()];
+  Store.replaceAll(data.blanks, old);
+  S.blanks = new Map(Object.entries(data.blanks).map(([p, l]) => [+p, orderBlanks(l)]));
+  S.undo = []; S.quiz = new Map(); S.sel = null;
+  $('undoBtn').disabled = true;
+  for (const v of S.views) v.renderUI();
+  updateScore();
+  closeSheet();
+  toast(`백업에서 빈칸 ${data.count}개를 불러왔어요.`);
+}
+
+function importSheet(data) {
+  openSheet(sh => {
+    const now = countBlanks(Object.fromEntries(S.blanks));
+    sh.append(mk('h2', null, '백업 불러오기'),
+      mk('p', 'hint', `백업 파일에 빈칸 ${data.count}개가 있어요${data.savedAt ? ` (${fmtDate(data.savedAt)}에 만듦)` : ''}.`),
+      mk('p', 'hint', `지금 있는 빈칸 ${now}개는 지워지고 백업 내용으로 바뀌어요.`));
+    const row = mk('div', 'row');
+    const no = mk('button', 'btn quiet', '취소'), yes = mk('button', 'btn primary', '백업으로 바꾸기');
+    no.type = yes.type = 'button';
+    no.addEventListener('click', closeSheet);
+    yes.addEventListener('click', () => applyBackup(data));
+    row.append(no, yes);
+    sh.append(row);
+  });
+}
+
+function toast(msg, label, act) {
+  let t = $('toast');
+  if (!t) { t = mk('div', 'toast'); t.id = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+  t.replaceChildren(mk('span', null, msg));
+  if (label) {
+    const b = mk('button', null, label);
+    b.type = 'button';
+    b.addEventListener('click', () => { t.hidden = true; act(); });
+    t.appendChild(b);
+  }
+  t.hidden = false;
+  clearTimeout(t._h);
+  t._h = setTimeout(() => { t.hidden = true; }, label ? 7000 : 3500);
+}
+
+async function boot() {
+  Store.init();
+  Dl.get();
+  $('modeEdit').addEventListener('click', () => setMode('edit'));
+  $('modeQuiz').addEventListener('click', () => setMode('quiz'));
+  $('undoBtn').addEventListener('click', undo);
+  $('listBtn').addEventListener('click', () => S.book && listSheet());
+  $('pageInd').addEventListener('click', () => S.book && (S.book.demo ? filesSheet() : listSheet()));
+  $('filesBtn').addEventListener('click', () => filesSheet());
+  $('openFiles').addEventListener('click', () => $('quickInput').click());
+  $('quickInput').addEventListener('change', e => { const fs = Array.from(e.target.files || []); e.target.value = ''; if (fs.length) quickOpen(fs); });
+  $('pdfInput').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) { pend.pdf = f; filesSheet(); } });
+  $('ocrInput').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) { pend.ocr = f; filesSheet(); } });
+  $('backupInput').addEventListener('change', async e => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f || !S.book) return;
+    try { importSheet(readBackup(await f.text())); } catch (err) { closeSheet(); toast(err.message || '백업 파일을 읽지 못했어요.'); }
+  });
+  document.addEventListener('keydown', e => {
+    const typing = e.target.closest && e.target.closest('input, textarea');
+    if (e.key === 'Escape') { if ($('sheet')) closeSheet(); else closePop(); return; }
+    if (typing || S.mode !== 'edit') return;
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); }
+    else if ((e.key === 'Backspace' || e.key === 'Delete') && S.sel) { e.preventDefault(); deleteBlank(S.views[S.sel.p], S.sel.id); }
+  });
+  let rz = 0;
+  window.addEventListener('resize', () => {
+    clearTimeout(rz);
+    rz = setTimeout(() => { for (const v of S.views) if (v.loaded && !v.ui.contains(document.activeElement)) v.renderUI(); }, 200);
+  });
+  if (ls.get('remember') !== false) {
+    const [pdf, ocr] = await Promise.all([FileCache.get('pdf'), FileCache.get('ocr')]);
+    if (pdf && ocr) {
+      setNotice('<b>저장해 둔 책을 여는 중…</b>', false);
+      try { await openBook(pdf, ocr); return; }
+      catch (e) { console.warn(e); toast('저장해 둔 책을 열지 못했어요. 파일을 다시 골라 주세요.'); }
+    }
+  }
+  await openDemo();
+}
+boot();
+</script>
+</body>
+</html>
